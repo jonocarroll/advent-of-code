@@ -1,10 +1,10 @@
 #' Advent of Code 2022 solutions
 #' @export
 aoc_solutions <- list(
-  day01a = NA,
-  day01b = NA,
-  day02a = NA,
-  day02b = NA,
+  day01a = 72718,
+  day01b = 213089,
+  day02a = 15749,
+  day02b = 14552,
   day03a = NA,
   day03b = NA,
   day04a = NA,

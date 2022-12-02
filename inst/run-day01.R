@@ -1,6 +1,5 @@
 library(adventofcode22)
 x <- readLines("./inst/input01.txt")
-# x <- gsub("^$", "\n", x)
 x <- paste(x, collapse = "\n")
 
 p1 <- f01a(x)
