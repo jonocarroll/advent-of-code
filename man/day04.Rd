@@ -96,9 +96,25 @@ pairs.
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+It seems like there is still quite a bit of duplicate work planned.
+Instead, the Elves would
+[like]{title="If you like this, you'll \emph{love} axis-aligned bounding box intersection testing."}
+to know the number of pairs that \emph{overlap at all}.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+In the above example, the first two pairs (\verb{2-4,6-8} and \verb{2-3,4-5})
+don\'t overlap, while the remaining four pairs (\verb{5-7,7-9}, \verb{2-8,3-7},
+\verb{6-6,4-6}, and \verb{2-6,4-8}) do overlap:
+\itemize{
+\item \verb{5-7,7-9} overlaps in a single section, \code{7}.
+\item \verb{2-8,3-7} overlaps all of the sections \code{3} through \code{7}.
+\item \verb{6-6,4-6} overlaps in a single section, \code{6}.
+\item \verb{2-6,4-8} overlaps in sections \code{4}, \code{5}, and \code{6}.
+}
+
+So, in this example, the number of overlapping assignment pairs is
+\emph{\code{4}}.
+
+\emph{In how many assignment pairs do the ranges overlap?}
 }
 \examples{
 f04a(example_data_04())
