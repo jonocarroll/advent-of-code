@@ -820,18 +820,49 @@ move_tail <- function(head_pos, tail_pos) {
 f09b <- function(x) {
   visited <- list()
   knots <- list()
+  all_knots <- list()
   for (i in 1:10) {
     knots[[i]] <- c(3, 3)
+    all_knots[[i]] <- list(knots[[i]])
   }
   visited <- c(visited, list(knots[[10]]))
   for (instr in x) {
     tmp <- move_knots(knots, instr)
     knots <- tmp[[1]]
+    for (i in 1:10) {
+      all_knots[[i]] <- c(all_knots[[i]], list(knots[[i]]))
+    }
     visited <- c(visited, tmp[[2]])
   }
+  # print(length(unique(visited)))
   length(unique(visited))
+  # all_knots
 }
 
+plot_moves <- function(k) {
+  m <- tibble::enframe(k, name = "knot")
+  m <- tidyr::unnest(m, value)
+  nm1 <- c(setdiff(names(m), 'value'), c("x", "y"))
+  m2 <- tidyr::unnest_wider(m, value, names_repair = ~ nm1, names_sep = "")
+  m3 <- dplyr::mutate(m2, step = dplyr::row_number())
+  library(ggplot2)
+  # library(gganimate)
+  a <- ggplot(m3) +
+    geom_point(aes(x = x, y = y, col = factor(knot), group = factor(knot)), size = 0.2) +
+    geom_path(data = m3[m3$knot == 10, ], aes(x = x, y = y), col = "black") +
+    geom_point(data = m3[m3$knot == 10, ], aes(x = x, y = y), col = "black", size = 0.8) +
+    # labs(title = 'Step: {frame_along}') +
+    # transition_reveal(step, keep_last = TRUE) +
+    # ease_aes('linear') +
+    theme_minimal() +
+    # theme_void() +
+    guides(col = "none") +
+    theme(aspect.ratio = 1) +
+    labs(x = "", y = "") +
+    theme(axis.text = element_blank())
+  # animate(a, nframes = nrow(m3))
+  a
+}
 
 f09_helper <- function(x) {
 
