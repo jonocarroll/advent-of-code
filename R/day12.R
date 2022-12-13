@@ -134,9 +134,16 @@ f12b <- function(x) {
   min(min_path[startat])
 }
 
+get_pos <- function(grid, v) {
+  i <- floor((v-1)/ncol(grid))+1
+  j <- ((v-1) %% ncol(grid))+1
+  return(c(i, j))
+}
+
 can_reach <- function(ngrid, v, dir = 1) {
-  i <- floor((v-1)/ncol(ngrid))+1
-  j <- ((v-1) %% ncol(ngrid))+1
+  x <- get_pos(ngrid, v)
+  i <- x[1]
+  j <- x[2]
   # can only move 1 row away
   res <- abs(floor(0:(prod(dim(ngrid))-1) / ncol(ngrid)) + 1 - i) <= 1 &
     # can only move 1 col away
@@ -165,12 +172,14 @@ dijkstra <- function(grid, start, dir = -1){
 
   # This contains the distances from the start node to all other nodes
   distances = rep(Inf, prod(dim(grid)))
+  paths = rep(list(), prod(dim(grid)))
 
   # This contains whether a node was already visited
   visited = rep(FALSE, prod(dim(grid)))
 
   # The distance from the start node to itself is of course 0
   distances[start] = 0
+  paths[[start]] = start
 
   # While there are nodes left to visit...
   repeat{
@@ -190,7 +199,7 @@ dijkstra <- function(grid, start, dir = -1){
 
     if(shortest_index == -1){
       # There was no node not yet visited --> We are done
-      return (distances)
+      return (list(distances, paths))
     }
     # ...then, for all neighboring nodes that haven't been visited yet....
     # for(i in seq_along(graph[shortest_index,])) {
@@ -201,6 +210,7 @@ dijkstra <- function(grid, start, dir = -1){
       if(g[i] != 0 && distances[i] > distances[shortest_index] + g[i]){
         # ...Save this path as new shortest path.
         distances[i] = distances[shortest_index] + g[i]
+        paths[[i]] <- c(paths[[shortest_index]], i)
         # cat("Updating distance of node ", i, " to ", distances[i], "\n")
       }
       # Lastly, note that we are finished with this node.
@@ -209,6 +219,44 @@ dijkstra <- function(grid, start, dir = -1){
       # cat("Currently lowest distances: ", distances, "\n")
     }
   }
+}
+
+plot_path <- function(x, scale = 6) {
+  library(ggplot2)
+  library(gganimate)
+
+  rows <- strsplit(x, "")
+  grid <- matrix(unlist(rows), ncol = nchar(x[1]), byrow = TRUE)
+  ngrid <- grid
+  ngrid[which(grid == "S", arr.ind = TRUE)] <- "a"
+  ngrid[which(grid == "E", arr.ind = TRUE)] <- "z"
+  ngrid[] <- match(ngrid[], letters)
+  mode(ngrid) <- "integer"
+  startat <- which(t(grid) == "S")
+  endat <- which(t(grid) == "E")
+  min_path <- dijkstra(ngrid, endat, dir = -1)
+
+  moves <- min_path[[2]][[startat]]
+  movespos <- as.data.frame(t(sapply(rev(moves), \(x) get_pos(grid, x))))
+  movespos$id <- seq_len(nrow(movespos))
+  gridpos <- expand.grid(V1 = 1:nrow(grid), V2 = 1:ncol(grid))
+  gridpos$val <- grid[as.matrix(gridpos)]
+  gridpos$num <- match(gridpos$val, letters)
+  gridpos[gridpos$val == "S", "num"] <- 1
+  gridpos[gridpos$val == "E", "num"] <- 26
+  p <- ggplot(gridpos, aes(V1, V2)) +
+    geom_tile(aes(fill = num)) +
+    # geom_text(aes(label = val)) +
+    geom_path(data = as.data.frame(movespos), aes(V1, V2), col = "red", size = 2, inherit.aes = FALSE) +
+    coord_flip() +
+    scale_x_reverse() +
+    scale_fill_viridis_c() +
+    theme_void() +
+    guides(fill = "none") +
+    # theme(aspect.ratio = 1) +
+    transition_reveal(id)
+  animate(p, end_pause = 12, height = nrow(grid)*scale, width = ncol(grid)*scale)
+  anim_save(filename = "inst/vis-day12.gif")
 }
 
 #' @param example Which example data to use (by position or name). Defaults to
