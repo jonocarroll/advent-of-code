@@ -272,6 +272,7 @@ fall <- function(cave, sand, crit = "fall") {
     cave[matrix(c(1,1), ncol = 2)] <- "X"
     return(cave)
   } else if (blocked(cave, c(1, 500+500))) {
+    sandmat <<- rbind(sandmat, c(1, 500+500))
     cave[matrix(c(1,500+500), ncol = 2)] <- "o"
     cave[matrix(c(1,1), ncol = 2)] <- "X"
     return(cave)
@@ -281,6 +282,7 @@ fall <- function(cave, sand, crit = "fall") {
     if (blocked(cave, downleft)) {
       downright <- c(sand[1]+1, sand[2]+1)
       if (blocked(cave, downright)) {
+        sandmat <<- rbind(sandmat, sand)
         cave[matrix(sand, ncol = 2)] <- "o"
       } else {
         return(fall(cave, downright))
@@ -324,6 +326,37 @@ fill_rocks <- function(x, y) {
     return(matrix(c(rep(x[2], length(span)), span), ncol = 2, byrow = FALSE))
   }
 }
+
+sandmat <- matrix(ncol = 2, nrow = 0)
+
+plot_cave <- function(cave, scale = 2) {
+  floor <- which(cave[, 1] == "#")
+  # min_x <- min(unlist(apply(cave[-floor, ], 1, \(y) which(y == "#")))) # 959
+  # max_x <- max(unlist(apply(cave[-floor, ], 1, \(y) which(y == "#")))) # 1017
+  cavedf <- reshape2::melt(cave)
+  sanddf <- as.data.frame(sandmat)
+  sanddf$id <- 1:nrow(sanddf)
+  library(ggplot2)
+  # library(gganimate)
+  p <- ggplot(cavedf, aes(Var2, Var1, fill = value)) +
+    geom_tile() +
+    geom_point(data = sanddf, aes(V2, V1, color = id), shape = 15, size = 1, inherit.aes = FALSE) +
+    scale_fill_manual(values = c("." = "black", "#" = "brown", "o" = "yellow")) +
+    # coord_cartesian(xlim = c(950, 1020), ylim = c(180, 0)) +
+    xlim(950, 1020) +
+    ylim(180, 0) +
+    coord_equal() +
+    theme_void() +
+    scale_color_viridis_c() +
+    # theme(aspect.ratio = 1) +
+    guides(fill = "none", color = "none") #+
+    # transition_reveal(id) +
+    # shadow_mark(past = TRUE, future = FALSE)
+  ggsave(filename = "inst/vis-day14.png", dpi = 200, height = 1600, width = 800, units = "px", bg = "black")
+  # animate(p, end_pause = 10, nframes = round(nrow(sanddf)/100))
+  # anim_save(filename = "inst/vis-day14.gif")
+}
+
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
