@@ -305,18 +305,35 @@ f16b <- function(x) {
   }
   colnames(dists) <- rownames(dists) <- names(valves)
 
-  I_opened <- calc_pressure("AA", valves, dists, 26)
-  open_valves_str <- names(I_opened)
-  open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
-  # closed_valves <- valves[!names(valves) %in% open_valves]
-  # E_opened <- calc_pressure("AA", closed_valves, dists, 26)
-  valves_2 <- valves
-  for (i in open_valves) {
-    valves_2[[i]]$rate <- 0
-  }
+  unname(calc_pressure2("AA", valves, dists, 26))
 
-  E_opened <- calc_pressure("AA", valves_2, dists, 26)
-  unname(I_opened + E_opened)
+  # I_opened <- calc_pressure("AA", valves, dists, 26)
+  # open_valves_str <- names(I_opened)
+  # open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
+  # print(open_valves)
+  # # closed_valves <- valves[!names(valves) %in% open_valves]
+  # # E_opened <- calc_pressure("AA", closed_valves, dists, 26)
+  # valves_2 <- valves
+  # for (i in open_valves) {
+  #   valves_2[[i]]$rate <- 0
+  # }
+  #
+  # E_opened <- calc_pressure("AA", valves_2, dists, 26)
+  # open_valves_str <- names(E_opened)
+  # open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
+  # print(open_valves)
+  #
+  # valves_2 <- valves
+  # for (i in open_valves) {
+  #   valves_2[[i]]$rate <- 0
+  # }
+  #
+  # I_opened <- calc_pressure("AA", valves_2, dists, 26)
+  # open_valves_str <- names(I_opened)
+  # open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
+  # print(open_valves)
+
+  # unname(I_opened + E_opened)
 }
 
 
@@ -352,29 +369,67 @@ calc_pressure <- function(cave, valves, distances, time_left, path_to_here = "")
   return(setNames(max_p, best_path))
 }
 
-calc_pressure2 <- function(me_cave, e_cave, valves, distances, time_left, me_path_to_here = "", e_path_to_here = "") {
-  path2 <- paste0(me_path_to_here, e_path_to_here, collapse = ";")
-  if (time_left <= 0) return(setNames(0, path2))
+calc_pressure2 <- function(cave, valves, distances, time_left, path_to_here = cave) {
+  if (time_left <= 0) return(setNames(0, path_to_here))
   # only consider closed valves with rate > 0
   valves <- valves[sapply(valves, "[[", "state") == 0 & sapply(valves, "[[", "rate") > 0]
-  if (length(valves) == 0) return(setNames(0, path2))
+  if (length(valves) == 0) return(setNames(0, path_to_here))
   # for each potential valve, calculate total pressure after travelling to and opening
-  found_pressures <- c()
-  explored_me_paths <- c()
-  explored_e_paths <- c()
+  i_found_pressures <- c()
+  e_found_pressures <- c()
+  i_explored_paths <- c()
+  e_explored_paths <- c()
   for (i in names(valves)) {
-    time_left_after_opening <- max(0, time_left - distances[cave, i] - 1)
-    pressure_from_valve <- time_left_after_opening * valves[[i]]$rate
-    next_steps <- calc_pressure(i, valves[names(valves) != i], distances, time_left_after_opening, paste0(path_to_here, i, collapse = ""))
-    found_pressures <- c(found_pressures, pressure_from_valve + next_steps)
-    explored_paths <- c(explored_paths, names(next_steps))
+    for (e in names(valves)) {
+      if (i == e) next;
+      i_time_left_after_opening <- max(0, time_left - distances[cave, i] - 1)
+      i_pressure_from_valve <- i_time_left_after_opening * valves[[i]]$rate
+      i_next_steps <- calc_pressure(i, valves[!names(valves) == i], distances, i_time_left_after_opening, paste0(path_to_here, i, collapse = ""))
+
+      e_time_left_after_opening <- max(0, time_left - distances[cave, e] - 1)
+      e_pressure_from_valve <- e_time_left_after_opening * valves[[e]]$rate
+      e_next_steps <- calc_pressure(e, valves[!names(valves) == e], distances, e_time_left_after_opening, paste0(path_to_here, e, collapse = ""))
+
+      # if (!anyDuplicated(c(get_paths(i_next_steps), get_paths(e_next_steps)))) {
+      # message("me : ", get_paths(i_next_steps))
+      # message("ele: ", get_paths(e_next_steps))
+      # foo <- readline()
+
+      if (length(intersect(get_paths(i_next_steps)[-1], get_paths(e_next_steps)[-1])) == 0) {
+        browser()
+        e_found_pressures <- c(e_found_pressures, e_pressure_from_valve + e_next_steps)
+        i_found_pressures <- c(i_found_pressures, i_pressure_from_valve + i_next_steps)
+
+        i_explored_paths <- c(i_explored_paths, names(i_next_steps))
+        e_explored_paths <- c(e_explored_paths, names(e_next_steps))
+      } else {
+        next
+      }
+
+    }
   }
-  max_i <- which.max(found_pressures)
-  max_p <- found_pressures[max_i]
-  best_path <- explored_paths[max_i]
-  return(setNames(max_p, best_path))
+
+  # max_i <- which.max(found_pressures)
+  # max_p <- found_pressures[max_i]
+  max_i <- which.max(i_found_pressures + e_found_pressures)
+  max_p <- i_found_pressures[max_i] + e_found_pressures[max_i]
+  message("ME : ", i_explored_paths[max_i])
+  message("ELE: ", e_explored_paths[max_i])
+  # best_path <- explored_paths[max_i]
+  # return(setNames(max_p, best_path))
+  return(max_p)
+#
+#
+#
+#   # i_best_path <- i_explored_paths[max_i]
+#   # e_best_path <- e_explored_paths[max_i]
+#   return(max_p)
 }
 
+get_paths <- function(x) {
+  open_valves_str <- names(x)
+  substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
+}
 
 dijkstra <- function(grid, start){
   #' Implementation of dijkstra using on-demand query
