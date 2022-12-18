@@ -392,7 +392,7 @@
 #' @examples
 #' f17a(example_data_17())
 #' f17b()
-f17a <- function(x, n, ret = c("floor", "heights", "chamber")) {
+f17a <- function(x, n, ret = c("floor", "heights", "chamber", "chamberlist")) {
   ret <- match.arg(ret)
   push <- strsplit(x, "")[[1]]
   #' The tall, vertical chamber is exactly *seven units wide*. Each rock
@@ -409,6 +409,8 @@ f17a <- function(x, n, ret = c("floor", "heights", "chamber")) {
   chamber[floor, ] <- 1
   lower_left <- c(floor + 3, 3) + 1
   maxheights <- c()
+  k <- 1
+  chamberlist <- vector(mode = "list", length = 1e4)
 
   while (r < n) {
 
@@ -421,6 +423,8 @@ f17a <- function(x, n, ret = c("floor", "heights", "chamber")) {
     if (!crash(lower_left + c(0, dir), nextrock, chamber)) {
       # message("dir = ", nextpush)
       lower_left <- lower_left + c(0, dir)
+      chamberlist[[k]] <- rest(lower_left, nextrock, chamber)[1:40,]
+      k <- k + 1
     } else {
       # message("crash ", nextpush)
     }
@@ -432,6 +436,8 @@ f17a <- function(x, n, ret = c("floor", "heights", "chamber")) {
     } else {
       # message("crash down")
       chamber <- rest(lower_left, nextrock, chamber)
+      chamberlist[[k]] <- chamber[1:40,]
+      k <- k + 1
       floor <- max(apply(chamber[, 2:8], 2, \(x) max(which(x != 0))))
       maxheights <- c(maxheights, floor)
       r <- r + 1
@@ -448,10 +454,46 @@ f17a <- function(x, n, ret = c("floor", "heights", "chamber")) {
     floor - 1
   } else if (ret == "chamber") {
     chamber[1:floor, ]
+  } else if (ret == "chamberlist") {
+    chamberlist[1:(k-1)]
   }
 
 }
 
+f17vis <- function(x, scale = 25) {
+  chambers <- f17a(x, 30, ret = "chamberlist")
+  chambersdf <- lapply(chambers, reshape2::melt)
+  chambersdf <- lapply(seq_along(chambersdf), \(y) {
+    chambersdf[[y]]$id <- y
+
+    chambersdf[[y]]
+  })
+  allchambers <- do.call(rbind, chambersdf)
+  # recolor floor
+  allchambers[allchambers$Var2 == 1 | allchambers$Var2 == 9, "value"] <- -1
+  allchambers[allchambers$Var1 == 1, "value"] <- -1
+  library(ggplot2)
+  library(gganimate)
+  p <- ggplot(allchambers, aes(Var2, Var1, fill = factor(value))) +
+    geom_tile() +
+    coord_equal(xlim = c(0,9)+0.5, ylim = c(0, 40)+0.5, expand = FALSE) +
+    scale_fill_manual(values = c(
+      "-1" = "grey70",
+      "0" = "black",
+      "1" = "purple",
+      "2" = "red",
+      "3" = "green",
+      "4" = "cyan",
+      "5" = "yellow"
+    )) +
+    geom_vline(xintercept = 0:9+0.5, col = "black") +
+    geom_hline(yintercept = 0:40+0.5, col = "black") +
+    theme_void() +
+    guides(fill = "none") +
+    transition_manual(frames = id)
+  animate(p, end_pause = 4, height = 40*scale, width = 9*scale, units = "px", fps = 4)
+  anim_save(filename = "inst/vis-day17.gif")
+}
 
 #' @rdname day17
 #' @export

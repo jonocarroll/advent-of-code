@@ -7,7 +7,7 @@
 \alias{example_data_17}
 \title{Day 17: Pyroclastic Flow}
 \usage{
-f17a(x, n, ret = c("floor", "heights", "chamber"))
+f17a(x, n, ret = c("floor", "heights", "chamber", "chamberlist"))
 
 f17b(x)
 
