@@ -5,6 +5,7 @@ p1 <- f16a(x)
 p2 <- f16b(x)
 
 # not 3246 (too high)
+# not 2376
 # not 2402 (too low)
 
 stopifnot(p1 == aoc_solutions$day16a)

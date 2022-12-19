@@ -305,35 +305,59 @@ f16b <- function(x) {
   }
   colnames(dists) <- rownames(dists) <- names(valves)
 
-  unname(calc_pressure2("AA", valves, dists, 26))
+  paths_cache <<- vector(mode = "integer", length = 1e6) # assigned globally, as big as we want
+  names_cache <<- vector(mode = "integer", length = 1e6) # assigned globally, as big as we want
+  cachelen <<- 0
 
-  # I_opened <- calc_pressure("AA", valves, dists, 26)
-  # open_valves_str <- names(I_opened)
-  # open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
-  # print(open_valves)
-  # # closed_valves <- valves[!names(valves) %in% open_valves]
-  # # E_opened <- calc_pressure("AA", closed_valves, dists, 26)
-  # valves_2 <- valves
-  # for (i in open_valves) {
-  #   valves_2[[i]]$rate <- 0
-  # }
-  #
-  # E_opened <- calc_pressure("AA", valves_2, dists, 26)
-  # open_valves_str <- names(E_opened)
-  # open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
-  # print(open_valves)
-  #
-  # valves_2 <- valves
-  # for (i in open_valves) {
-  #   valves_2[[i]]$rate <- 0
-  # }
-  #
-  # I_opened <- calc_pressure("AA", valves_2, dists, 26)
-  # open_valves_str <- names(I_opened)
-  # open_valves <- substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
-  # print(open_valves)
+  ## Dr Strange style: look at all possible paths the elephant could take and
+  ## for each of them, I run the optimal route with the remaining valves
 
-  # unname(I_opened + E_opened)
+  findpaths_ <- calc_pressure_all("AA", valves, dists, 26)
+  message("futures calculated")
+  futures <- setNames(paths_cache[1:cachelen], names_cache[1:cachelen])
+  futures <- rev(sort(futures[futures > 800]))
+
+  mypaths <- futures
+  mypaths[] <- 0
+
+  largest_seen <- 0
+
+  statecache <- list()
+
+  for (f in seq_along(futures)) {
+    elephant <- futures[f]
+    if (elephant < (largest_seen / 2)) break
+    if (nchar(names(elephant)) == 0) next
+    elephant_opens <- get_paths(elephant)
+    valves2 <- valves
+    for (v in seq_along(valves2)) {
+      if (valves[[v]]$valve %in% elephant_opens) {
+      valves2[[v]]$rate <- 0
+      }
+    }
+    if (all(sapply(valves2, "[[", "rate") == 0)) next
+    valvestate <- paste0(sapply(valves2, "[[", "rate"), collapse = "")
+    if (valvestate %in% names(statecache)) {
+      mypaths[f] <- statecache[[valvestate]]
+      next
+    }
+    # can we beat this even if we open all the valves?
+    if (elephant + 26*sum(sapply(valves2, "[[", "rate")) < largest_seen) next
+    tmp <- calc_pressure("AA", valves2, dists, 26)
+    mypaths[f] <- tmp
+    names(mypaths)[f] <- names(tmp)
+    statecache[[valvestate]] <- tmp
+    largest_seen <- max(largest_seen, futures[f] + mypaths[f])
+  }
+
+  totalpressure <- futures + mypaths
+  message("futures: ")
+  print(futures[which.max(totalpressure)])
+  message("mypaths:")
+  print(mypaths[which.max(totalpressure)])
+  message("Highest total pressure:")
+  print(max(totalpressure))
+  max(totalpressure)
 }
 
 
@@ -369,65 +393,186 @@ calc_pressure <- function(cave, valves, distances, time_left, path_to_here = "")
   return(setNames(max_p, best_path))
 }
 
-calc_pressure2 <- function(cave, valves, distances, time_left, path_to_here = cave) {
-  if (time_left <= 0) return(setNames(0, path_to_here))
+calc_pressure_all <- function(cave, valves, distances, time_left, path_to_here = "", pressure_to_here = 0) {
+  if (time_left <= 0) {
+    # paths_cache <<- c(paths_cache, setNames(pressure_to_here, path_to_here))
+    return(setNames(pressure_to_here, path_to_here))
+  }
+  # don't continue if we've been here already
   # only consider closed valves with rate > 0
   valves <- valves[sapply(valves, "[[", "state") == 0 & sapply(valves, "[[", "rate") > 0]
-  if (length(valves) == 0) return(setNames(0, path_to_here))
-  # for each potential valve, calculate total pressure after travelling to and opening
-  i_found_pressures <- c()
-  e_found_pressures <- c()
-  i_explored_paths <- c()
-  e_explored_paths <- c()
-  for (i in names(valves)) {
-    for (e in names(valves)) {
-      if (i == e) next;
-      i_time_left_after_opening <- max(0, time_left - distances[cave, i] - 1)
-      i_pressure_from_valve <- i_time_left_after_opening * valves[[i]]$rate
-      i_next_steps <- calc_pressure(i, valves[!names(valves) == i], distances, i_time_left_after_opening, paste0(path_to_here, i, collapse = ""))
-
-      e_time_left_after_opening <- max(0, time_left - distances[cave, e] - 1)
-      e_pressure_from_valve <- e_time_left_after_opening * valves[[e]]$rate
-      e_next_steps <- calc_pressure(e, valves[!names(valves) == e], distances, e_time_left_after_opening, paste0(path_to_here, e, collapse = ""))
-
-      # if (!anyDuplicated(c(get_paths(i_next_steps), get_paths(e_next_steps)))) {
-      # message("me : ", get_paths(i_next_steps))
-      # message("ele: ", get_paths(e_next_steps))
-      # foo <- readline()
-
-      if (length(intersect(get_paths(i_next_steps)[-1], get_paths(e_next_steps)[-1])) == 0) {
-        browser()
-        e_found_pressures <- c(e_found_pressures, e_pressure_from_valve + e_next_steps)
-        i_found_pressures <- c(i_found_pressures, i_pressure_from_valve + i_next_steps)
-
-        i_explored_paths <- c(i_explored_paths, names(i_next_steps))
-        e_explored_paths <- c(e_explored_paths, names(e_next_steps))
-      } else {
-        next
-      }
-
-    }
+  if (length(valves) == 0) {
+    # paths_cache <<- c(paths_cache, setNames(pressure_to_here, path_to_here))
+    return(setNames(pressure_to_here, path_to_here))
   }
-
+  # for each potential valve, calculate total pressure after travelling to and opening
+  found_pressures <- c()
+  # explored_paths <- c()
+  for (i in names(valves)) {
+    path_would_be <- paste0(path_to_here, i, collapse = "")
+    # full_cache <- get("paths_cache", envir = .GlobalEnv)
+    if (path_would_be %in% names(paths_cache)) {
+      message("skipping", path_would_be)
+      next
+    }
+    # message("path_would_be = ")
+    # print(path_would_be)
+    time_left_after_opening <- max(0, time_left - distances[cave, i] - 1)
+    pressure_from_valve <- time_left_after_opening * valves[[i]]$rate
+    p <- setNames(pressure_to_here + pressure_from_valve, path_would_be)
+    paths_cache[cachelen + 1:length(p)] <<- p
+    names_cache[cachelen + 1:length(p)] <<- names(p)
+    cachelen <<- cachelen + length(p)
+    next_steps <- calc_pressure_all(i, valves[names(valves) != i], distances, time_left_after_opening, path_would_be, pressure_to_here + pressure_from_valve)
+    found_pressures <- c(found_pressures, pressure_from_valve + next_steps)
+    # explored_paths <- c(explored_paths, names(next_steps))
+  }
   # max_i <- which.max(found_pressures)
   # max_p <- found_pressures[max_i]
-  max_i <- which.max(i_found_pressures + e_found_pressures)
-  max_p <- i_found_pressures[max_i] + e_found_pressures[max_i]
-  message("ME : ", i_explored_paths[max_i])
-  message("ELE: ", e_explored_paths[max_i])
   # best_path <- explored_paths[max_i]
   # return(setNames(max_p, best_path))
-  return(max_p)
-#
-#
-#
-#   # i_best_path <- i_explored_paths[max_i]
-#   # e_best_path <- e_explored_paths[max_i]
-#   return(max_p)
+  # new_cache <- c(get("paths_cache", envir = .GlobalEnv), found_pressures)
+  # assign("paths_cache", new_cache, envir = .GlobalEnv)
+  # paths_cache <<- c(paths_cache, )
+  # return(found_pressures)
+  return(found_pressures)
 }
 
+# calc_pressure2 <- function(cave, valves, distances, time_left, path_to_here = cave) {
+#   if (time_left <= 0) return(setNames(0, path_to_here))
+#   # only consider closed valves with rate > 0
+#   valves <- valves[sapply(valves, "[[", "state") == 0 & sapply(valves, "[[", "rate") > 0]
+#   if (length(valves) == 0) return(setNames(0, path_to_here))
+#   # for each potential valve, calculate total pressure after travelling to and opening
+#   i_found_pressures <- c()
+#   e_found_pressures <- c()
+#   i_explored_paths <- c()
+#   e_explored_paths <- c()
+#   for (i in names(valves)) {
+#     for (e in names(valves)) {
+#       if (i == e) next;
+#       i_time_left_after_opening <- max(0, time_left - distances[cave, i] - 1)
+#       i_pressure_from_valve <- i_time_left_after_opening * valves[[i]]$rate
+#       i_next_steps <- calc_pressure(i, valves[!names(valves) == i], distances, i_time_left_after_opening, paste0(path_to_here, i, collapse = ""))
+#
+#       e_time_left_after_opening <- max(0, time_left - distances[cave, e] - 1)
+#       e_pressure_from_valve <- e_time_left_after_opening * valves[[e]]$rate
+#       e_next_steps <- calc_pressure(e, valves[!names(valves) == e], distances, e_time_left_after_opening, paste0(path_to_here, e, collapse = ""))
+#
+#       # if (!anyDuplicated(c(get_paths(i_next_steps), get_paths(e_next_steps)))) {
+#       # message("me : ", get_paths(i_next_steps))
+#       # message("ele: ", get_paths(e_next_steps))
+#       # foo <- readline()
+#
+#       if (length(intersect(get_paths(i_next_steps)[-1], get_paths(e_next_steps)[-1])) == 0) {
+#         browser()
+#         e_found_pressures <- c(e_found_pressures, e_pressure_from_valve + e_next_steps)
+#         i_found_pressures <- c(i_found_pressures, i_pressure_from_valve + i_next_steps)
+#
+#         i_explored_paths <- c(i_explored_paths, names(i_next_steps))
+#         e_explored_paths <- c(e_explored_paths, names(e_next_steps))
+#       } else {
+#         next
+#       }
+#
+#     }
+#   }
+#
+#   # max_i <- which.max(found_pressures)
+#   # max_p <- found_pressures[max_i]
+#   max_i <- which.max(i_found_pressures + e_found_pressures)
+#   max_p <- i_found_pressures[max_i] + e_found_pressures[max_i]
+#   message("ME : ", i_explored_paths[max_i])
+#   message("ELE: ", e_explored_paths[max_i])
+#   # best_path <- explored_paths[max_i]
+#   # return(setNames(max_p, best_path))
+#   return(max_p)
+# #
+# #
+# #
+# #   # i_best_path <- i_explored_paths[max_i]
+# #   # e_best_path <- e_explored_paths[max_i]
+# #   return(max_p)
+# }
+
+#
+# #' adapted from https://favtutor.com/blogs/breadth-first-search-python
+# #' re-adapted after day 18
+# bfs <- function(node, x) {
+#
+#   # maxnodes <- length(x)
+#   # bb <- apply(x, 2, range)
+#   # bb[1, ] <- bb[1, ] - 2
+#   # bb[2, ] <- bb[2, ] + 1
+#
+#   # visited = [] # List for visited nodes.
+#   # queue = []     #Initialize a queue
+#   visited <- c()
+#   queue <- c()
+#   # kv <- 0
+#   # kq <- 0
+#   #
+#   # def bfs(visited, graph, node): #function for BFS
+#   #   visited.append(node)
+#   # queue.append(node)
+#   # kv <- kv + 1
+#   # visited[kv,] <- node
+#   visited <- c(visited, node)
+#   # kq <- kq + 1
+#   # queue[kq, ] <- node
+#   queue <- c(queue, node)
+#
+#   #
+#   # while queue:          # Creating loop to visit each node
+#   while (length(queue) > 0) {
+#     #   m = queue.pop(0)
+#     # print (m, end = " ")
+#     # m <- queue[kq, ]
+#     # kq <- kq - 1
+#     m <- tail(queue, 1)
+#     queue <- head(queue, -1)
+#
+#     # if (kv %% 10 == 0) message("visited ", kv, " points")
+#
+#     #
+#     # for neighbour in graph[m]:
+#     #   if neighbour not in visited:
+#     #   visited.append(neighbour)
+#     # queue.append(neighbour)
+#     # nb <- neighbours(m, x)
+#     nb <- x[[m]]$tunnels
+#     if (nrow(nb) > 0) {
+#       for (n in seq_len(nrow(nb))) {
+#         # message("kv = ", kv)
+#         # message("n = ", n)
+#         # print(nb[n, ])
+#         # if (!vecMatch(visited[1:kv, , drop = FALSE], nb[n, ])) {
+#         if (!n %in% visited) {
+#           # if (!(n %in% visited)) {
+#           # kv <- kv + 1
+#           # visited[kv, ] <- nb[n, ]
+#           # kq <- kq + 1
+#           visited <- c(visited, n)
+#           # queue[kq, ] <- nb[n, ]
+#           queue <- c(queue, n)
+#         }
+#       }
+#     }
+#   }
+#   visited
+# }
+#
+# vecMatch <- function(x, want) {
+#   if (length(want) == 2) {
+#     any(x[, 1] == want[1] & x[, 2] == want[2])
+#   } else if (length(want) == 3) {
+#     any(x[, 1] == want[1] & x[, 2] == want[2] & x[, 3] == want[3])
+#   }
+# }
+#
 get_paths <- function(x) {
   open_valves_str <- names(x)
+  if (nchar(open_valves_str) == 2) return(open_valves_str)
   substring(open_valves_str, seq(1,nchar(open_valves_str)-1,2), seq(2,nchar(open_valves_str),2))
 }
 
@@ -496,36 +641,36 @@ dijkstra <- function(grid, start){
   }
 }
 
-#' # a = list(value = 0, children = list(list(value = 1, children = list(list(value = 3), list(value = 4))), list(value = 2, children = list(list(value = 5), list(value = 6)))))
-#' dfs <- function(start, target) {
-#'   #' adapted from https://www.algorithms-and-technologies.com/dfs/r
-#'   #' Implementation of DFS (depth-first search) algorithm to find the shortest path from a start to a target node..
-#'   #' Given a start node, this returns the node in the tree below the start node with the target value (or null if it doesn't exist)
-#'   #' Runs in O(n), where n is the number of nodes in the tree, or O(b^d), where b is the branching factor and d is the depth.
-#'   #' @param start  the node to start the search from
-#'   #' @param target the value to search for
-#'   #' @return The node containing the target value or null if it doesn't exist.
-#'
-#'   cat("Visiting Node ", start$value, "\n")
-#'   if(start$value == target){
-#'     # We have found the goal node we we're searching for
-#'     print("Found the node we're looking for!")
-#'     return (start)
-#'   }
-#'
-#'   # Recurse with all children
-#'   for(i in seq_along(start$children)) {
-#'     result = dfs(start$children[[i]], target)
-#'     if (!is.null(result)) {
-#'       # We've found the goal node while going down that child
-#'       return (result)
-#'     }
-#'   }
-#'
-#'   # We've gone through all children and not found the goal node
-#'   cat("Went through all children of ", start$value, ", returning to it's parent.", "\n")
-#'   return (NULL)
-#' }
+# # a = list(value = 0, children = list(list(value = 1, children = list(list(value = 3), list(value = 4))), list(value = 2, children = list(list(value = 5), list(value = 6)))))
+# dfs <- function(start, target) {
+#   #' adapted from https://www.algorithms-and-technologies.com/dfs/r
+#   #' Implementation of DFS (depth-first search) algorithm to find the shortest path from a start to a target node..
+#   #' Given a start node, this returns the node in the tree below the start node with the target value (or null if it doesn't exist)
+#   #' Runs in O(n), where n is the number of nodes in the tree, or O(b^d), where b is the branching factor and d is the depth.
+#   #' @param start  the node to start the search from
+#   #' @param target the value to search for
+#   #' @return The node containing the target value or null if it doesn't exist.
+#
+#   cat("Visiting Node ", start$value, "\n")
+#   if(start$value == target){
+#     # We have found the goal node we we're searching for
+#     print("Found the node we're looking for!")
+#     return (start)
+#   }
+#
+#   # Recurse with all children
+#   for(i in seq_along(start$children)) {
+#     result = dfs(start$children[[i]], target)
+#     if (!is.null(result)) {
+#       # We've found the goal node while going down that child
+#       return (result)
+#     }
+#   }
+#
+#   # We've gone through all children and not found the goal node
+#   cat("Went through all children of ", start$value, ", returning to it's parent.", "\n")
+#   return (NULL)
+# }
 
 parseinput <- function(x) {
   valve <- sub("Valve ([A-Z]{2}).*", "\\1", x)
