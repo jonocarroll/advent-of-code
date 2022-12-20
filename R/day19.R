@@ -243,75 +243,20 @@ f19a <- function(x) {
   # OR select one of the possible options at random, lots of times
 
   options(expressions = 5e5) # now we're getting serious
-  most_geodes <<- 0
-  factory <- init_factory[1,]
-  materials <- init_materials[1,]
-  blueprint <- costs[[2]]
 
-  geodecache <<- new.env()
-  maxg <- eval_blueprint_queue(blueprint, materials, factory, 24)
+  maxg <- vector(mode = "integer", length = length(x))
 
-  # cached_factory <- NULL
-  # cached_materials <- NULL
-  # set.seed(42)
-  #
-  # for (it in 1:1e4) {
-  #
-  #   factory <- init_factory
-  #   materials <- init_materials
-  #   blueprint <- costs[[1]]
-  #   t <- 2
-  #
-  #   # while t <= 26
-  #   while (t <= 25) {
-  #     factory[t, ] <- factory[t - 1, ]
-  #     materials[t, ] <- materials[t - 1, ]
-  #     # prune if there's not enough time to collect enough geodes
-  #     # using triangular numbers
-  #     if ((materials[t, "geode"] + (24-t)*factory[t, "geode"] + sum(seq(24-t)-1)) < most_geodes) break
-  #
-  #     too_many <- have_too_many(blueprint, factory[t, ])
-  #     too_many["geode"] <- FALSE
-  #     build <- can_make(blueprint, materials[t, ]) & !too_many
-  #     could_build_next <- can_make(blueprint, materials[t, ] + factory[t, ]) & !too_many
-  #     will_build <- c(0, 0, 0, 0)
-  #     if (sum(build) == 0) {
-  #       TRUE # wait
-  #     } else if (build["geode"]) {
-  #       build <- 4
-  #       will_build[build] <- 1
-  #       materials[t, ] <- materials[t, ] - blueprint[build, ]
-  #     } else if (build["obsidian"]) {
-  #       build <- 3
-  #       will_build[build] <- 1
-  #       materials[t, ] <- materials[t, ] - blueprint[build, ]
-  #     } else if (any(!build & could_build_next)) {
-  #       TRUE # don't do anything
-  #     } else if (sum(build) == 1 && runif(1) < 0.9) {
-  #     # } else if (sum(build) == 1) {
-  #       will_build <- as.integer(build)
-  #       materials[t, ] <- materials[t, ] - blueprint[build, ]
-  #     } else if (sum(build) > 1 && runif(1) < 0.7) {
-  #       build <- sample(which(build), 1)
-  #       will_build[build] <- 1
-  #       materials[t, ] <- materials[t, ] - blueprint[build, ]
-  #     }
-  #
-  #     materials[t, ] <- materials[t, ] + factory[t, ]
-  #     factory[t, ] <- factory[t - 1, ] + will_build
-  #     t <- t + 1
-  #   }
-  #
-  #   if (materials["t24", "geode"] > most_geodes) {
-  #     most_geodes <- materials["t24", "geode"]
-  #     cached_materials <- materials
-  #     cached_factory <- factory
-  #   }
-  #
-  #   it <- it + 1
-  # }
-  # most_geodes
-  maxg
+  for (bp in seq_along(x)) {
+    message("Processing Blueprint ", bp)
+    most_geodes <<- 0
+    factory <- init_factory[1,]
+    materials <- init_materials[1,]
+    blueprint <- costs[[bp]]
+    geodecache <<- new.env()
+    maxg[[bp]] <- eval_blueprint_queue(blueprint, materials, factory, 24)
+  }
+
+  sum(sapply(seq_along(maxg), \(y) y*maxg[[y]]))
 }
 
 can_make <- function(blueprint, mats) {
@@ -330,25 +275,14 @@ eval_blueprint_queue <- function(blueprint, materials, factory, t) {
     return(materials["geode"])
   }
 
-  # message("factory:")
-  # print(factory)
-  # readline()
-
-
-  # don't keep more materials than we can use to build robots in the remaining time; increases cache collisions
-  # max_costs <- apply(blueprint, 2, max)
-  # max_costs["geode"] <- 1e3
-  # # materials <- setNames(pmin(materials, max_costs), robots)
-  # materials <- setNames(pmin(materials, max_costs), robots)
-
   # discard material if there's not enough time to build a robot per minute with it
+  # results in more cache collisions
   for (m in products) {
     materials[m] <- min(materials[m], max(blueprint[m, ])*t)
   }
 
   hash <- paste0("id", paste0(c(materials, factory, t), collapse = ""), collapse = "")
   if (exists(hash, envir = geodecache)) {
-    # message("alreadh seen this at t = ", t)
     return(get(hash, envir = geodecache))
   }
 
@@ -359,118 +293,29 @@ eval_blueprint_queue <- function(blueprint, materials, factory, t) {
     return(0)
   }
 
-
   too_many <- have_too_many(blueprint, factory)
   too_many["geode"] <- FALSE
 
-
   build <- can_make(blueprint, materials) & !too_many
-  # message("build:")
-  # print(build)
-  # message("too many:")
-  # print(too_many)
-  #  could_build_next <- can_make(blueprint, materials + factory) & !too_many
   will_build <- c(0, 0, 0, 0)
 
   all_next_steps <- c()
 
   if ( t == 1 || (sum(build) == 0)) {
-    # message("nothing to build")
-    ## next_able <- 0
-
-    ## tmpm <- materials
-    ## while (!build["geode"] && sum(build) == 0 && t > 2 ) { ## CHECK THIS!
-    ##     t <- t - 1
-    ##     tmpm <- tmpm + factory
-    ##     build <- can_make(blueprint, tmpm) & !too_many
-    ## }
-
-    # don't bother building anything if this is the final minute
-    ## if (t == 1) {
-    ##     return(tmpm["geode"])
-
     next_steps <- eval_blueprint_queue(blueprint, materials + factory, factory, t - 1)
     all_next_steps <- c(all_next_steps, next_steps)
-    # hash <- paste0("id", paste0(c(materials + factory, factory, t), collapse = ""), collapse = "")
-    # assign(hash, next_steps, envir = geodecache)
-  # } else if (build["geode"]) {
-  #   # message("can build geode")
-  #   build <- 4
-  #   will_build[build] <- 1
-  #   next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[build, ] + factory, factory + will_build, t - 1)
-  #   all_next_steps <- c(all_next_steps, next_steps)
-  #   # hash <- paste0("id", paste0(c(materials - blueprint[build, ], factory + will_build, t), collapse = ""), collapse = "")
-  #   # assign(hash, next_steps, envir = geodecache)
   } else {
-    # message("can build ", toString(robots[which(build)]))
-    # explore building better bots first
     for (j in rev(which(build))) {
       will_build <- c(0, 0, 0, 0)
       will_build[j] <- 1
       next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[j, ] + factory, factory + will_build, t - 1)
       all_next_steps <- c(all_next_steps, next_steps)
-      # hash <- paste0("id", paste0(c(materials - blueprint[j, ], factory + will_build, t), collapse = ""), collapse = "")
-      # assign(hash, next_steps, envir = geodecache)
     }
-
     # option to do nothing
     next_steps <- eval_blueprint_queue(blueprint, materials + factory, factory, t - 1)
     all_next_steps <- c(all_next_steps, next_steps)
-    # hash <- paste0("id", paste0(c(materials, factory, t), collapse = ""), collapse = "")
-    # assign(hash, next_steps, envir = geodecache)
   }
-  ## will_build[build] <- 1
-  ## next_steps <- eval_blueprint_queue(blueprint, tmpm, factory + will_build, t - next_able)
-  ## all_next_steps <- c(all_next_steps, next_steps)
-  ## hash <- paste0("id", paste0(c(tmpm, factory + will_build, t - next_able), collapse = ""), collapse = "")
-  ## assign(hash, next_steps, envir = geodecache)
-  # } else if (build["geode"]) {
-  #   build <- 4
-  #   will_build[build] <- 1
-  #   next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[build, ] + factory, factory + will_build, t - 1)
-  #   all_next_steps <- c(all_next_steps, next_steps)
-  #   hash <- paste0("id", paste0(c(materials - blueprint[build, ] + factory, factory + will_build, t - 1), collapse = ""), collapse = "")
-  #   assign(hash, next_steps, envir = geodecache)
-  #   ## } else if (build["obsidian"]) {
-  #   ##   build <- 3
-  #   ##   will_build[build] <- 1
-  #   ##   next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[build, ] + factory, factory + will_build, t - 1)
-  #   ##   all_next_steps <- c(all_next_steps, next_steps)
-  #   ##   hash <- paste0("id", paste0(c(materials - blueprint[build, ] + factory, factory + will_build, t - 1), collapse = ""), collapse = "")
-  #   ##   assign(hash, next_steps, envir = geodecache)
-  #   ## } else if (any(!build & could_build_next)) {
-  #   ##   build <- which(!build & could_build_next)
-  #   ##   for (j in build) {
-  #   ##     will_build <- c(0, 0, 0, 0)
-  #   ##     will_build[j] <- 1
-  #   ##     next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[j, ] + 2*factory, factory + will_build, t - 2)
-  #   ##     all_next_steps <- c(all_next_steps, next_steps)
-  #   ##     hash <- paste0("id", paste0(c(materials - blueprint[j, ] + factory, factory + will_build, t - 1), collapse = ""), collapse = "")
-  #   ##     assign(hash, next_steps, envir = geodecache)
-  #   ##   }
-  #   ##   next_steps <- eval_blueprint_queue(blueprint, materials + factory, factory, t - 1)
-  #   ##   all_next_steps <- c(all_next_steps, next_steps)
-  # } else {
-  #   build <- which(build)
-  #   for (j in build) {
-  #     will_build <- c(0, 0, 0, 0)
-  #     will_build[j] <- 1
-  #     next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[j, ] + factory, factory + will_build, t - 1)
-  #     all_next_steps <- c(all_next_steps, next_steps)
-  #     hash <- paste0("id", paste0(c(materials - blueprint[j, ] + factory, factory + will_build, t - 1), collapse = ""), collapse = "")
-  #     assign(hash, next_steps, envir = geodecache)
-  #   }
-  #   # option to do nothing
-  #   next_steps <- eval_blueprint_queue(blueprint, materials + factory, factory, t - 1)
-  #   all_next_steps <- c(all_next_steps, next_steps)
-  #   hash <- paste0("id", paste0(c(materials + factory, factory, t - 1), collapse = ""), collapse = "")
-  #   assign(hash, next_steps, envir = geodecache)
-  # }
 
-  # hash <- paste0("id", paste0(c(materials, factory, t), collapse = ""), collapse = "")
-
-  # message("t = ", t)
-  # print(all_next_steps)
   max_i <- which.max(all_next_steps)
   max_geodes <- all_next_steps[max_i]
   most_geodes <<- max(most_geodes, max_geodes)
