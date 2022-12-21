@@ -155,10 +155,8 @@
 #' f20a(example_data_20())
 #' f20b()
 f20a <- function(x) {
-  l <- length(x)
-  # "hash" each value to keep track of it
-  hash <- make.names(x, unique = TRUE)
-  newx <- mix(x, hash)
+  newx <- mix(x)
+  # 1, 2, -3, 4, 0, 3, -2
   is0 <- which(newx == 0)
   sum(as.integer(newx[(is0 + 1:3*1000 - 1) %% l + 1]))
 }
@@ -168,44 +166,32 @@ f20a <- function(x) {
 #' @export
 f20b <- function(x) {
   key <- 811589153
-  # l <- length(x)
   xint <- (as.numeric(x))* key
-  # "hash" each value to keep track of it
-  hash <- make.names(xint, unique = TRUE)
-  # xint <- (as.numeric(x) %% (l-1)) * key
-  for (i in 1:10) {
-    xint <- mix(xint, hash)
-  }
-  is0 <- which(xint == 0)
-  format(sum(as.numeric(xint[(is0 + 1:3*1000 - 1) %% l + 1])), scientific = FALSE)
+  xint <- mix(xint, cycles = 10)
+
+  is0 <- which(xint == 0)[1]
+  format(sum(as.numeric(xint[(is0 + 1:3*1000 - 1) %% length(xint) + 1])), scientific = FALSE)
 }
 
 
-mix <- function(x, hash) {
+mix <- function(x, cycles = 1) {
   l <- length(x)
-
+  # "hash" each value to keep track of it
+  hash <- make.names(x, unique = TRUE)
   y <- hash
-  for (i in seq_along(x)) {
-    hash_to_move <- hash[i]
-    current_pos <- which(y == hash_to_move)
-    new_pos <- (current_pos + as.numeric(x[i]))
-    if (new_pos > l) new_pos <- (new_pos) %% (l-1)
-    if (new_pos < 1) new_pos <- (new_pos) %% (l-1)
-    # new_pos <- new_pos %% (l-1)
-    if (new_pos == current_pos) next
-    if (new_pos < 1) new_pos <- l
-    yold <- paste0("old", y[current_pos])
-    ynew <- hash_to_move
-    y[current_pos] <- yold
-    ## if deleting an element, the new one needs to slot in one later
-    if (which(y == yold) < new_pos) new_pos <- new_pos + 1
-    y <- append(y, ynew, after = new_pos-1)
-    y <- y[y != yold]
-    message("moving ", x[i], "(", hash[i], ")")
-    print(x[match(y, hash)])
+  for (i in rep(hash, cycles)) {
+    y <- shift(y, x, hash, i)
   }
   x[match(y, hash)]
 }
+
+shift <- function(y, x, hash, val_to_move) {
+  el_to_move <- match(val_to_move, y)
+  val_in_original <- x[match(val_to_move, hash)]
+  y <- y[-el_to_move]
+  append(y, val_to_move, after = (el_to_move - 1 + as.numeric(val_in_original)) %% (length(x) - 1))
+}
+
 
 
 #' @param example Which example data to use (by position or name). Defaults to
