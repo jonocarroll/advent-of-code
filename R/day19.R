@@ -225,22 +225,7 @@
 #' f19b()
 f19a <- function(x) {
   # rows are robots, cols are materials
-  costs <- lapply(x, parseInput)
-
-  # cols are robots, materials; rows are minutes - 1
-  init_materials <- matrix(0, nrow = 25, ncol = length(products))
-  colnames(init_materials) <- products
-  # init_robots <- matrix(0, ncol = length(robots))
-  # init_robots[1, 1] <- 1
-  init_factory <- matrix(0, nrow = 25, ncol = length(robots))
-  colnames(init_factory) <- robots
-  init_factory[c(1, 2), "ore"] <- 1
-  # colnames(init_robots) <- robots
-  rownames(init_materials) <- rownames(init_factory) <- paste0("t", 0:24)
-
-  # robots <- colSums(factory) ## only update factory at end of each minute
-  # BFS finding which robot to make next
-  # OR select one of the possible options at random, lots of times
+  costs <- lapply(x, parseInput19)
 
   options(expressions = 5e5) # now we're getting serious
 
@@ -248,80 +233,127 @@ f19a <- function(x) {
 
   for (bp in seq_along(x)) {
     message("Processing Blueprint ", bp)
-    most_geodes <<- 0
-    factory <- init_factory[1,]
-    materials <- init_materials[1,]
-    blueprint <- costs[[bp]]
-    geodecache <<- new.env()
-    maxg[[bp]] <- eval_blueprint_queue(blueprint, materials, factory, 24)
+    maxg[bp] <- find_max_for_blueprint(costs[[bp]])
+    message("found: ", maxg[bp])
   }
 
   sum(sapply(seq_along(maxg), \(y) y*maxg[[y]]))
 }
 
-can_make <- function(blueprint, mats) {
-  # switch to failthrough for loop for performance?
-  apply(blueprint, 1, \(y) all(mats >= y))
-}
+find_max_for_blueprint <- function(blueprint) {
 
-have_too_many <- function(blueprint, fac) {
-  max_cost <- apply(blueprint, 2, max)
-  fac > max_cost
-}
+  # cols are robots, materials; rows are minutes - 1
+  init_materials <- matrix(0, nrow = 25, ncol = length(products))
+  colnames(init_materials) <- products
+  init_factory <- matrix(0, nrow = 25, ncol = length(robots))
+  colnames(init_factory) <- robots
+  init_factory[c(1, 2), "ore"] <- 1
+  rownames(init_materials) <- rownames(init_factory) <- paste0("t", 0:24)
 
-eval_blueprint_queue <- function(blueprint, materials, factory, t) {
-  if (t <= 0) {
-    # if (materials["geode"] == 8) browser()
-    return(materials["geode"])
-  }
+  most_geodes <- 0
+  factory <- init_factory[1,]
+  materials <- init_materials[1,]
+  max_req_mat <<- apply(blueprint, 2, max)
+  geodecache <<- new.env()
 
-  # discard material if there's not enough time to build a robot per minute with it
-  # results in more cache collisions
-  for (m in products) {
-    materials[m] <- min(materials[m], max(blueprint[m, ])*t)
-  }
+  eval_blueprint_queue <- function(blueprint, materials, factory, t) {
 
-  hash <- paste0("id", paste0(c(materials, factory, t), collapse = ""), collapse = "")
-  if (exists(hash, envir = geodecache)) {
-    return(get(hash, envir = geodecache))
-  }
-
-  # prune if there's not enough time to collect enough geodes
-  # using triangular numbers
-  if ((materials["geode"] + t*factory["geode"] + sum(seq(t)-1)) < most_geodes) {
-    assign(hash, 0, envir = geodecache)
-    return(0)
-  }
-
-  too_many <- have_too_many(blueprint, factory)
-  too_many["geode"] <- FALSE
-
-  build <- can_make(blueprint, materials) & !too_many
-  will_build <- c(0, 0, 0, 0)
-
-  all_next_steps <- c()
-
-  if ( t == 1 || (sum(build) == 0)) {
-    next_steps <- eval_blueprint_queue(blueprint, materials + factory, factory, t - 1)
-    all_next_steps <- c(all_next_steps, next_steps)
-  } else {
-    for (j in rev(which(build))) {
-      will_build <- c(0, 0, 0, 0)
-      will_build[j] <- 1
-      next_steps <- eval_blueprint_queue(blueprint, materials - blueprint[j, ] + factory, factory + will_build, t - 1)
-      all_next_steps <- c(all_next_steps, next_steps)
+    if (materials["geode"] > most_geodes) {
+      # message("NEW BEST: ", materials["geode"])
+      # message("materials:")
+      # print(materials)
+      # message("bots:")
+      # print(factory)
     }
-    # option to do nothing
-    next_steps <- eval_blueprint_queue(blueprint, materials + factory, factory, t - 1)
-    all_next_steps <- c(all_next_steps, next_steps)
+    most_geodes <<- max(most_geodes, materials["geode"])
+
+    if ( t == 0 ) return()
+
+    # # discard material if there's not enough time to build a robot per minute with it
+    # # results in more cache collisions
+    # # max_req_mat is global
+    for (m in head(seq_along(materials), -1)) {
+      if (factory[m] >= max(blueprint[, m])) {
+        materials[m] <- min(materials[m], max(blueprint[, m]))
+      }
+    }
+
+    hash <- paste0("id", paste0(c(materials, factory, t), collapse = ""), collapse = "")
+
+    if (exists(hash, envir = geodecache)) return()
+
+    assign(hash, 0, envir = geodecache)
+
+    # prune if there's not enough time to collect enough geodes
+    # using triangular numbers
+    if ((materials["geode"] + t*factory["geode"] + sum(seq(t)-1)) < most_geodes) {
+      return()
+    }
+
+    # always do nothing in the last minute
+    if ( t == 1 ) {
+      Recall(blueprint, materials + factory, factory, t - 1)
+    } else {
+      next_minute <- tick(blueprint, materials, factory, t)
+      for (j in seq_along(next_minute)) {
+        Recall(blueprint, next_minute[[j]]$materials, next_minute[[j]]$factory, t - next_minute[[j]]$t)
+      }
+    }
+
+    most_geodes
+
   }
 
-  max_i <- which.max(all_next_steps)
-  max_geodes <- all_next_steps[max_i]
-  most_geodes <<- max(most_geodes, max_geodes)
-  assign(hash, max_geodes, envir = geodecache)
-  return(max_geodes)
+  tmp <- eval_blueprint_queue(blueprint, materials, factory, 24)
+  message("explored ", length(geodecache), " states")
+  message("found ", tmp)
+  message("maxfound = ", most_geodes)
+  # maxg[bp] <- tmp
+  # message("Able to make ", maxg[bp], " geodes")
+  most_geodes
+}
 
+tick <- function(blueprint, materials, factory, t) {
+
+  maxcost <- apply(blueprint, 2, max)
+
+  opts <- list()
+
+  # fast forward until we *can* build something, then do it
+  for (bot in rev(seq_along(materials))) {
+
+    tmpm <- materials
+    tmpf <- factory
+    enough <- tmpf >= maxcost
+    enough["geode"] <- FALSE
+
+    for (time_spent in 1:(t-1)) {
+
+      build <- apply(blueprint, 1, \(y) all(tmpm >= y)) & !enough
+
+      tmpm <- tmpm + tmpf
+      if (!build[bot]) {
+        next
+      }
+
+      will_build <- c(0, 0, 0, 0)
+      will_build[bot] <- 1
+      opts <- c(opts,
+                list(
+                  list(
+                    materials = tmpm - blueprint[bot, ],
+                    factory = tmpf + will_build,
+                    t = time_spent
+                  )
+                )
+      )
+      break
+
+    }
+
+  }
+
+  opts
 }
 
 
@@ -338,7 +370,7 @@ f19_helper <- function(x) {
 
 products <- robots <- c("ore", "clay", "obsidian", "geode")
 
-parseInput <- function(x) {
+parseInput19 <- function(x) {
   bp <- as.integer(sub("Blueprint ([0-9]*):.*", "\\1", x))
   robots <- matrix(0, nrow = length(products), ncol = length(products))
   colnames(robots) <- rownames(robots) <- products

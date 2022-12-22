@@ -99,9 +99,26 @@ monkeys]{title="Advent of Code 2022: Now With Considerably More Monkeys"}.
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+Due to some kind of monkey-elephant-human mistranslation, you seem to
+have misunderstood a few key details about the riddle.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+First, you got the wrong job for the monkey named \code{root}; specifically,
+you got the wrong math operation. The correct operation for monkey
+\code{root} should be \code{=}, which means that it still listens for two numbers
+(from the same two monkeys as before), but now checks that the two
+numbers \emph{match}.
+
+Second, you got the wrong monkey for the job starting with \verb{humn:}. It
+isn\'t a monkey - it\'s \emph{you}. Actually, you got the job wrong, too: you
+need to figure out \emph{what number you need to yell} so that \code{root}\'s
+equality check passes. (The number that appears after \verb{humn:} in your
+input is now irrelevant.)
+
+In the above example, the number you need to yell to pass \code{root}\'s
+equality test is \emph{\code{301}}. (This causes \code{root} to get the same number,
+\code{150}, from both of its monkeys.)
+
+\emph{What number do you yell to pass \code{root}\'s equality test?}
 }
 \examples{
 f21a(example_data_21())
