@@ -250,7 +250,279 @@ f22a <- function(x) {
 #' @rdname day22
 #' @export
 f22b <- function(x) {
+  dat <- readmap(x)
+  map <- dat$map
+  w <- 50
+  instr <- dat$inst
 
+  sides <- list()
+  sides[[1]] <- map[1:50, 51:100]
+  sides[[2]] <- map[1:50, 101:150]
+  sides[[3]] <- map[51:100, 51:100]
+  sides[[4]] <- map[101:150, 1:50]
+  sides[[5]] <- map[101:150, 51:100]
+  sides[[6]] <- map[151:200, 1:50]
+
+  cube <- array(dim = c(50, 50, 6))
+  for (i in 1:6) {
+    cube[,,i] <- sides[[i]]
+  }
+
+  pos <- c(1, 1, 1) # finally count downward!
+  facing <- "E"
+  for (i in seq_along(instr)) {
+    posdata <- move2(cube, instr[i], pos, facing)
+    pos <- posdata[[1]]
+    facing <- posdata[[2]]
+  }
+
+  facingval <- switch(facing,
+                      E = 0,
+                      S = 1,
+                      W = 2,
+                      N = 3)
+  message("final position: ")
+  print(pos)
+
+  if (pos[3] == 1) {
+    pos[2] <- pos[2] + w
+  } else if (pos[3] == 2) {
+    pos[2] <- pos[2] + 2*w
+  } else if (pos[3] == 3) {
+    pos[1] <- pos[1] + w
+    pos[2] <- pos[2] + w
+  } else if (pos[3] == 4) {
+    pos[1] <- pos[1] + 2*w
+  } else if (pos[3] == 5) {
+    pos[1] <- pos[1] + 2*w
+    pos[2] <- pos[2] + w
+  } else if (pos[3] == 6) {
+    pos[1] <- pos[1] + 3*w
+  }
+
+  message("final position on map: ")
+  print(pos)
+  message("final facing value: ", facingval)
+  1e3*pos[1] + 4*pos[2] + facingval
+
+}
+
+wrap <- function(pos, facing) {
+
+    #'     11112222
+    #'     11112222
+    #'     11112222
+    #'     11112222
+    #'     3333
+    #'     3333
+    #'     3333
+    #'     3333
+    #' 44445555
+    #' 44445555
+    #' 44445555
+    #' 44445555
+    #' 6666
+    #' 6666
+    #' 6666
+    #' 6666
+
+  w <- 50
+
+  newpos <- c(0,0,0)
+
+  if (pos[3] == 1 && facing == "W") {
+    newpos[1] <- w + 1 - pos[1]
+    newpos[2] <- 1
+    newpos[3] <- 4
+    newfacing <- "E"
+  } else if (pos[3] == 1 && facing == "E") {
+    newpos[1] <- pos[1]
+    newpos[2] <- 1
+    newpos[3] <- 2
+    newfacing <- "E"
+  } else if (pos[3] == 1 && facing == "N") {
+    newpos[1] <- pos[2]
+    newpos[2] <- 1
+    newpos[3] <- 6
+    newfacing <- "E"
+  } else if (pos[3] == 1 && facing == "S") {
+    newpos[1] <- 1
+    newpos[2] <- pos[2]
+    newpos[3] <- 3
+    newfacing <- "S"
+  } else if (pos[3] == 2 && facing == "W") {
+    newpos[1] <- pos[1]
+    newpos[2] <- w
+    newpos[3] <- 1
+    newfacing <- "W"
+  } else if (pos[3] == 2 && facing == "E") {
+    newpos[1] <- w + 1 - pos[1]
+    newpos[2] <- w
+    newpos[3] <- 5
+    newfacing <- "W"
+  } else if (pos[3] == 2 && facing == "N") {
+    newpos[1] <- w
+    newpos[2] <- pos[2]
+    newpos[3] <- 6
+    newfacing <- "N"
+  } else if (pos[3] == 2 && facing == "S") {
+    newpos[1] <- pos[2]
+    newpos[2] <- w
+    newpos[3] <- 3
+    newfacing <- "W"
+  } else if (pos[3] == 3 && facing == "N") {
+    newpos[1] <- w
+    newpos[2] <- pos[2]
+    newpos[3] <- 1
+    newfacing <- "N"
+  } else if (pos[3] == 3 && facing == "S") {
+    newpos[1] <- 1
+    newpos[2] <- pos[2]
+    newpos[3] <- 5
+    newfacing <- "S"
+  } else if (pos[3] == 3 && facing == "E") {
+    newpos[1] <- w
+    newpos[2] <- pos[1]
+    newpos[3] <- 2
+    newfacing <- "N"
+  } else if (pos[3] == 3 && facing == "W") {
+    newpos[1] <- 1
+    newpos[2] <- pos[1]
+    newpos[3] <- 4
+    newfacing <- "S"
+  } else if (pos[3] == 4 && facing == "N") {
+    newpos[1] <- pos[2]
+    newpos[2] <- 1
+    newpos[3] <- 3
+    newfacing <- "E"
+  } else if (pos[3] == 4 && facing == "S") {
+    newpos[1] <- 1
+    newpos[2] <- pos[2]
+    newpos[3] <- 6
+    newfacing <- "S"
+  } else if (pos[3] == 4 && facing == "E") {
+    newpos[1] <- pos[1]
+    newpos[2] <- 1
+    newpos[3] <- 5
+    newfacing <- "E"
+  } else if (pos[3] == 4 && facing == "W") {
+    newpos[1] <- w + 1 - pos[1]
+    newpos[2] <- 1
+    newpos[3] <- 1
+    newfacing <- "E"
+  } else if (pos[3] == 5 && facing == "N") {
+    newpos[1] <- w
+    newpos[2] <- pos[2]
+    newpos[3] <- 3
+    newfacing <- "N"
+  } else if (pos[3] == 5 && facing == "S") {
+    newpos[1] <- pos[2]
+    newpos[2] <- w
+    newpos[3] <- 6
+    newfacing <- "W"
+  } else if (pos[3] == 5 && facing == "E") {
+    newpos[1] <- w + 1 - pos[1]
+    newpos[2] <- w
+    newpos[3] <- 2
+    newfacing <- "W"
+  } else if (pos[3] == 5 && facing == "W") {
+    newpos[1] <- pos[1]
+    newpos[2] <- w
+    newpos[3] <- 4
+    newfacing <- "W"
+  } else if (pos[3] == 6 && facing == "N") {
+    newpos[1] <- w
+    newpos[2] <- pos[2]
+    newpos[3] <- 4
+    newfacing <- "N"
+  } else if (pos[3] == 6 && facing == "S") {
+    newpos[1] <- 1
+    newpos[2] <- pos[2]
+    newpos[3] <- 2
+    newfacing <- "S"
+  } else if (pos[3] == 6 && facing == "E") {
+    newpos[1] <- w
+    newpos[2] <- pos[1]
+    newpos[3] <- 5
+    newfacing <- "N"
+  } else if (pos[3] == 6 && facing == "W") {
+    newpos[1] <- 1
+    newpos[2] <- pos[1]
+    newpos[3] <- 1
+    newfacing <- "S"
+  }
+
+  list(newpos = newpos, newfacing = newfacing)
+
+}
+
+move2 <- function(map, instr, pos, facing) {
+
+  w <- 50
+
+  if (!is.na(suppressWarnings(num <- as.integer(instr)))) {
+    # message("attempting to move ", num, " steps ", facing)
+    # newfacing <- facing
+    for (i in 1:num) {
+
+      # if (is.character(testfacing)) {
+        testfacing <- switch(facing,
+                             N = c(-1, 0, 0),
+                             E = c(0, 1, 0),
+                             S = c(1, 0, 0),
+                             W = c(0, -1, 0))
+      # }
+
+      testpos <- pos + testfacing
+
+      if (facing %in% c("E", "W")) {
+        if (testpos[2] < 1 | testpos[2] > w) {
+          # message("wrap ew")
+          tmp <- wrap(testpos, facing)
+          testpos <- tmp$newpos
+          testfacing <- tmp$newfacing
+        } else {
+          testfacing <- facing
+        }
+      } else if (facing %in% c("N", "S")) {
+        if (testpos[1] < 1 | testpos[1] > w) {
+          # message("wrap ns")
+          tmp <- wrap(testpos, facing)
+          testpos <- tmp$newpos
+          testfacing <- tmp$newfacing
+        } else {
+          testfacing <- facing
+        }
+      }
+
+      # print(c(testpos, newfacing))
+      if (any(grepl("[#]", map[matrix(testpos, ncol = 3)]))) {
+        break
+      }
+
+      pos <- testpos
+      facing <- testfacing
+
+    }
+    newpos <- pos
+    newfacing <- facing
+  } else {
+    if (instr == "L") {
+      newfacing <- switch(facing,
+                          N = "W",
+                          E = "N",
+                          S = "E",
+                          W = "S")
+    } else if (instr == "R") {
+      newfacing <- switch(facing,
+                          N = "E",
+                          E = "S",
+                          S = "W",
+                          W = "N")
+    }
+    newpos <- pos
+  }
+  list(newpos, newfacing)
 }
 
 
