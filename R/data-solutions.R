@@ -49,6 +49,5 @@ aoc_solutions <- list(
   day23b = 970,
   day24a = 314,
   day24b = 896,
-  day25a = NA,
-  day25b = NA
+  day25a = "20-1-11==0-=0112-222"
 )
