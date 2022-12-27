@@ -1,0 +1,38 @@
+name: Continuous Integration
+
+on: push
+
+env:
+    CARGO_TERM_COLOR: always
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        name: Check
+        steps:
+            - uses: actions/checkout@v3
+            - name: cargo check
+              run: cargo check
+    test:
+        runs-on: ubuntu-latest
+        name: Test
+        steps:
+            - uses: actions/checkout@v3
+            - name: cargo test
+              run: cargo test
+    # uncomment to enable clippy lints
+    # clippy:
+    #     runs-on: ubuntu-latest
+    #     name: Lint (clippy)
+    #     steps:
+    #         - uses: actions/checkout@v3
+    #         - name: cargo clippy
+    #           run: cargo clippy -- -D warnings
+    # uncoment to enable format checking
+    # fmt:
+    #     runs-on: ubuntu-latest
+    #     name: Format
+    #     steps:
+    #         - uses: actions/checkout@v3
+    #         - name: cargo fmt
+    #           run: cargo fmt --check
