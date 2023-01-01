@@ -1,10 +1,7 @@
-use regex::Regex;
-
 pub fn part_one(input: &str) -> Option<String> {
-    // let parts =
     let (stacks, instr) = parse05(&input);
     let mut crates = stacks.crates();
-
+    // println!("{:?}", instr);
     for i in 0..instr.len() {
         // println!("{:?}", instr[i].parse());
         // println!("{:?}", crates);
@@ -16,7 +13,6 @@ pub fn part_one(input: &str) -> Option<String> {
 }
 
 pub fn part_two(input: &str) -> Option<String> {
-    // let parts =
     let (stacks, instr) = parse05(&input);
     let mut crates = stacks.crates();
 
@@ -30,29 +26,27 @@ pub fn part_two(input: &str) -> Option<String> {
     Some(tops)
 }
 
-fn crane(crates: Vec<Vec<char>>, instr: (u32, u32, u32)) -> Vec<Vec<char>> {
-    let n: u32 = instr.0;
-    // println!("n = {:?}", n);
+fn crane(crates: Vec<Vec<char>>, instr: (usize, usize, usize)) -> Vec<Vec<char>> {
+    // println!("n = {:?}", instr.0);
     let mut tmpcrates = crates.clone(); //TODO use references!
-    for _i in 0..n {
-        let tomove: char = tmpcrates[(instr.1 - 1) as usize].pop().unwrap();
-        tmpcrates[(instr.2 - 1) as usize].push(tomove);
+    for _i in 0..instr.0 {
+        let tomove: char = tmpcrates[instr.1 - 1].pop().unwrap();
+        tmpcrates[instr.2 - 1].push(tomove);
     }
     tmpcrates
 }
 
-fn crane9001(crates: Vec<Vec<char>>, instr: (u32, u32, u32)) -> Vec<Vec<char>> {
-    let n = instr.0 as usize;
+fn crane9001(crates: Vec<Vec<char>>, instr: (usize, usize, usize)) -> Vec<Vec<char>> {
     let mut tmpcrates = crates.clone(); 
-    let new_len = tmpcrates[(instr.1 - 1) as usize].len();
+    let new_len = tmpcrates[instr.1 - 1].len();
     let mut tomove = vec![];
-    for _i in 0..n {
-        tomove.push(tmpcrates[(instr.1 - 1) as usize].pop().unwrap());
+    for _i in 0..instr.0 {
+        tomove.push(tmpcrates[instr.1 - 1].pop().unwrap());
     }
     tomove.reverse();
-    tmpcrates[(instr.1 - 1) as usize].truncate(new_len - n);
+    tmpcrates[instr.1 - 1].truncate(new_len - instr.0);
     for x in tomove.into_iter() {
-        tmpcrates[(instr.2 - 1) as usize].push(x);
+        tmpcrates[instr.2 - 1].push(x);
     }
     tmpcrates
 }
@@ -97,12 +91,26 @@ struct Instructions {
 }
 
 impl Instructions {
-    fn parse(&self) -> (u32, u32, u32) {
-        let re = Regex::new(r"move (\d*) from (\d*) to (\d*)").unwrap();
-        let caps = re.captures(&self.input).unwrap();
-        let moveto = caps[1].parse::<u32>().unwrap();
-        let from = caps[2].parse::<u32>().unwrap();
-        let to = caps[3].parse::<u32>().unwrap();
+    fn parse(&self) -> (usize, usize, usize) {
+        // regex is slooooow!
+        // let re = Regex::new(r"move (\d*) from (\d*) to (\d*)").unwrap();
+        // let caps = re.captures(&self.input).unwrap();
+        // p1 (regex): 89ms
+        // p2 (regex): 73ms
+        //
+        // p1 (refactored): 403µs
+        // p2 (refactored): 431µs
+        //
+        // p1 (R): 257ms
+        // p2 (R): 248ms
+        let instr = String::from(&self.input);
+        let caps = instr
+            .split_whitespace()
+            .filter(|c| c.parse::<usize>().is_ok())
+            .collect::<Vec<_>>();
+        let moveto = caps[0].parse::<usize>().unwrap();
+        let from = caps[1].parse::<usize>().unwrap();
+        let to = caps[2].parse::<usize>().unwrap();
 
         (moveto, from, to)
     }
