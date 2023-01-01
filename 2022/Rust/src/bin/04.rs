@@ -1,6 +1,6 @@
 #[derive(Debug)]
 struct Assignments {
-    sections: String
+    sections: String,
 }
 
 impl Assignments {
@@ -16,9 +16,9 @@ fn fully_contains(pairs: Vec<Assignments>) -> bool {
     let p1 = pairs[0].ids();
     let p2 = pairs[1].ids();
     if p1.len() >= p2.len() {
-        return p1.start <= p2.start && p1.end >= p2.end
+        return p1.start <= p2.start && p1.end >= p2.end;
     } else {
-        return p2.start <= p1.start && p2.end >= p1.end
+        return p2.start <= p1.start && p2.end >= p1.end;
     }
 }
 
@@ -32,8 +32,12 @@ fn overlap_at_all(pairs: Vec<Assignments>) -> bool {
 
 fn create_assignments(line: &str) -> Vec<Assignments> {
     let pair = line.split_once(',').unwrap();
-    let p1 = Assignments { sections: pair.0.to_string() };
-    let p2 = Assignments { sections: pair.1.to_string() };
+    let p1 = Assignments {
+        sections: pair.0.to_string(),
+    };
+    let p2 = Assignments {
+        sections: pair.1.to_string(),
+    };
     vec![p1, p2]
 }
 
