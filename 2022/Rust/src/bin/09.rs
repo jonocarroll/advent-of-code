@@ -12,13 +12,6 @@ impl<T: Add<Output = T>> Add for Point<T> {
     }
 }
 
-// impl Index<usize> for Point<i32> {
-//     type Output = i32;
-//     fn index(&self, index: usize) -> &Self::Output {
-//         &self[index]
-//     }
-// }
-
 pub fn part_one(input: &str) -> Option<u32> {
     let movements = input.lines();
     let mut visited: HashSet<Point<i32>> = HashSet::new();
@@ -40,7 +33,7 @@ fn follow(mut head: Point<i32>, mut tail: Point<i32>, instr: &str, mut visited: 
     let dist = parts[1].parse::<usize>().unwrap();
     for _d in 0..dist {
         head = move_head(&head, dir);
-        tail = move_tail(head, tail);
+        tail = move_tail(&head, &tail);
         visited.insert(tail);
     }
     (head, tail, visited)
@@ -53,7 +46,7 @@ fn follow_knots(mut knots: Vec<Point<i32>>, instr: &str, mut visited: HashSet<Po
     for _d in 0..dist {
         knots[0] = move_head(&knots[0], dir);
         for k in 1..knots.len() {
-            knots[k] = move_tail(knots[k-1], knots[k]);
+            knots[k] = move_tail(&knots[k-1], &knots[k]);
         }
         visited.insert(knots[knots.len()-1]);
     }
@@ -76,8 +69,8 @@ fn touching(head: &Point<i32>, tail: &Point<i32>) -> bool {
     ((head.0 - tail.0).abs() <= 1 && (head.1 - tail.1).abs() <= 1)
 }
 
-fn move_tail(head: Point<i32>, tail: Point<i32>) -> Point<i32> {
-    if touching(&head, &tail) { return tail }
+fn move_tail(head: &Point<i32>, tail: &Point<i32>) -> Point<i32> {
+    if touching(&head, &tail) { return *tail }
     if tail.0 == head.0 { 
         return Point(tail.0, tail.1 + (head.1 - tail.1).signum())
     } else if tail.1 == head.1 {
