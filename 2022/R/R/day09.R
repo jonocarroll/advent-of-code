@@ -747,7 +747,7 @@ f09a <- function(x) {
   # print_grid(head_pos, tail_pos)
   visited <- c(visited, list(tail_pos))
   for (instr in x) {
-    tmp <- move(head_pos, tail_pos, instr)
+    tmp <- move_rope(head_pos, tail_pos, instr)
     head_pos <- tmp[[1]]
     tail_pos <- tmp[[2]]
     visited <- c(visited, tmp[[3]])
@@ -777,7 +777,7 @@ move_head <- function(head_pos, dir) {
   if (dir == "D") return(c(head_pos[1] + 1, head_pos[2]))
 }
 
-move <- function(head_pos, tail_pos, x) {
+move_rope <- function(head_pos, tail_pos, x) {
   visited <- list()
   dir <- sub(" .*", "", x)
   dist <- as.integer(sub("[LRUD] ", "", x))
