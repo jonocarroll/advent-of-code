@@ -114,7 +114,7 @@ f12a <- function(x) {
   startat <- which(t(grid) == "S")
   endat <- which(t(grid) == "E")
   min_path <- dijkstra(ngrid, endat, dir = -1)
-  min_path[startat]
+  min_pathp[startat]
 }
 
 #' @rdname day12
@@ -125,7 +125,7 @@ f12b <- function(x) {
   ngrid <- grid
   ngrid[which(grid == "S", arr.ind = TRUE)] <- "a"
   ngrid[which(grid == "E", arr.ind = TRUE)] <- "z"
-  ngrid[] <- lookup(ngrid)
+  ngrid[] <- match(ngrid[], letters)
   mode(ngrid) <- "integer"
 
   startat <- which(t(grid) == "a")
