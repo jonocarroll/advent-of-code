@@ -21,7 +21,7 @@ pub fn part_one(input: &str) -> Option<u64> {
             for item in &this_monkey_items {
                 monkey_items[this_monkey_i].pop();
                 inspections[this_monkey_i] += 1;
-                worry = apply_fn(this_monkey.op.clone(), *item) / 3;
+                worry = apply_fn(this_monkey.op.clone(), item) / 3;
                 if worry % (this_monkey.test as u64) == 0 {
                     monkey_items[this_monkey.istrue].push((worry % maxdiv) as u64);
                 } else {
@@ -48,23 +48,23 @@ pub fn part_two(input: &str) -> Option<u64> {
         }
     }
     
-    let mut this_monkey: Monkey;
-    let mut this_monkey_items: Vec<u64>;
+    // let mut this_monkey: Monkey;
+    // let mut this_monkey_items: Vec<u64>;
     let mut worry;
     let alltests = monkeys.iter().map(|x| x.test as u64).collect::<Vec<u64>>();
     let maxdiv: u64 = alltests.iter().product();
     for _round in 0..10_000 {
         for this_monkey_i in 0..monkeys.len() {
-            this_monkey = monkeys[this_monkey_i].clone();
-            this_monkey_items = monkey_items[this_monkey_i].clone();
-            for item in &this_monkey_items {
+            // this_monkey = monkeys[this_monkey_i].clone();
+            // this_monkey_items = monkey_items[this_monkey_i].clone();
+            for item in monkey_items[this_monkey_i].clone() {
                 monkey_items[this_monkey_i].pop();
                 inspections[this_monkey_i] += 1;
-                worry = apply_fn(this_monkey.op.clone(), *item);
-                if worry % (this_monkey.test as u64) == 0 {
-                    monkey_items[this_monkey.istrue].push((worry % maxdiv) as u64);
+                worry = apply_fn(monkeys[this_monkey_i].op.clone(), &item);
+                if worry % (monkeys[this_monkey_i].test as u64) == 0 {
+                    monkey_items[monkeys[this_monkey_i].istrue].push((worry % maxdiv) as u64);
                 } else {
-                    monkey_items[this_monkey.isfalse].push((worry % maxdiv) as u64);
+                    monkey_items[monkeys[this_monkey_i].isfalse].push((worry % maxdiv) as u64);
                 }
             } // items
         } // monkeys
@@ -109,21 +109,21 @@ fn parse11(input: &str) -> Vec<Monkey> {
     monkeys
 }
 
-fn apply_fn(f: Vec<char>, old: u64) -> u64 {
-    let op = f[0];
-    let val = String::from(f[2..].iter().collect::<String>());
+fn apply_fn(f: Vec<char>, old: &u64) -> u64 {
+    let op = &f[0];
+    let val = &String::from(f[2..].iter().collect::<String>());
     let newval = if val == "old" {
         match op {
-            '+' => old + old,
-            '*' => old * old,
-            _ => old
+            '+' => *old + *old,
+            '*' => *old * *old,
+            _ => *old
         }
     } else {
-        let ival = val.parse::<u64>().unwrap();
+        let ival = &val.parse::<u64>().unwrap();
         match op {
-            '+' => old + ival,
-            '*' => old * ival,
-            _ => old
+            '+' => *old + ival,
+            '*' => *old * ival,
+            _ => *old
         }
     };
     newval as u64
@@ -132,9 +132,7 @@ fn apply_fn(f: Vec<char>, old: u64) -> u64 {
 fn main() {
     let input = &advent_of_code::read_file("inputs", 11);
     advent_of_code::solve!(1, part_one, input);
-    // for _i in 0..10
     advent_of_code::solve!(2, part_two, input);
-    // }
 }
 
 #[cfg(test)]
