@@ -11,6 +11,7 @@ publish = false
 itertools = "0.10.5"
 pico-args = "0.5.0"
 regex = "1.7.0"
+serde_json = "1.0.91"
 
 [profile.release]
 debug = true
