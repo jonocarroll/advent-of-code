@@ -117,6 +117,7 @@ f01b <- function(x) {
     tots <- tots[-n]
   }
   res
+  # sum(head(sort(tots, decreasing = TRUE), 3))
 }
 
 
