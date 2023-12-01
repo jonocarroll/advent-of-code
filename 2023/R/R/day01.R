@@ -127,3 +127,25 @@ example_data_01 <- function(example = 1) {
   )
   l[[example]]
 }
+
+## part a works with gregexec, but partb is still off by 7
+#' f01a <- function(x) {
+#'   digits <- gregexec("([0-9])", x)
+#'   fandl <- sapply(seq_along(digits), \(y) {
+#'     d <- digits[[y]]
+#'     paste0(substr(x[[y]], d[1,1], d[1,1]), substr(x[[y]], d[1,ncol(d)], d[1,ncol(d)]))
+#'     })
+#'   sum(as.integer(fandl))
+#' }
+#' 
+#' 
+#' f01b <- function(x) {
+#'   digits <- gregexec("[0-9]|one|two|three|four|five|six|seven|eight|nine", x)
+#'   mat <- sapply(regmatches(x, digits), \(y) y[1, c(1, ncol(y))])
+#'   d <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+#'   for (p in seq_along(d)) {
+#'     mat <- sub(d[p], p, mat)    
+#'   }
+#'   fandl <- apply(mat, 2, paste0, collapse = "")
+#'   sum(as.integer(fandl))
+#' }
