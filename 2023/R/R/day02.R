@@ -124,17 +124,14 @@ f02b <- function(x) {
 f02_helper <- function(x) {
   game <- as.integer(sub("Game ([0-9]*).*", "\\1", x))
   x <- sub(".*: ", "", x)
-  sets <- sapply(strsplit(x, "; "), \(y) lapply(strsplit(y, ","), trimws))
-  totals <- lapply(sets, \(z) unglue::unglue_data(z, "{n1=\\d+} {c1}"))
-  possible <- function(d) {
-    r <- d[d$c1 == "red", "n1"]
-    g <- d[d$c1 == "green", "n1"]
-    b <- d[d$c1 == "blue", "n1"]
-    (length(r) == 0 || as.integer(r) <= 12) && 
-      (length(g) == 0 || as.integer(g) <= 13) && 
-      (length(b) == 0 || as.integer(b) <= 14)
+  sets <- unlist(sapply(strsplit(x, "; "), \(y) sapply(strsplit(y, ","), trimws), simplify = F))
+  possible <- function(s) {
+    vals <- strsplit(s, " ")[[1]]
+    (vals[2] == "red" && as.integer(vals[1]) <= 12) ||
+      (vals[2] == "green" && as.integer(vals[1]) <= 13) || 
+        (vals[2] == "blue" && as.integer(vals[1]) <= 14)
   }
-  c(game, all(sapply(totals, possible)))
+  c(game, all(sapply(sets, possible)))
 }
 
 
@@ -142,38 +139,25 @@ f02b_helper <- function(x) {
   game <- as.integer(sub("Game ([0-9]*).*", "\\1", x))
   x <- sub(".*: ", "", x)
   sets <- sapply(strsplit(x, "; "), \(y) lapply(strsplit(y, ","), trimws))
-  totals <- lapply(sets, \(z) unglue::unglue_data(z, "{n1=\\d+} {c1}"))
+  totals <- lapply(sets, \(z) unglue::unglue_data(z, "{n=\\d+} {c}"))
   check_max <- function(d1, d2) {
-    r1 <- as.integer(d1[d1$c1 == "red", "n1"])
-    r2 <- as.integer(d2[d2$c1 == "red", "n1"])
-    b1 <- as.integer(d1[d1$c1 == "blue", "n1"])
-    b2 <- as.integer(d2[d2$c1 == "blue", "n1"])
-    g1 <- as.integer(d1[d1$c1 == "green", "n1"])
-    g2 <- as.integer(d2[d2$c1 == "green", "n1"])
+    r1 <- as.integer(d1[d1$c == "red", "n"])
+    r2 <- as.integer(d2[d2$c == "red", "n"])
+    b1 <- as.integer(d1[d1$c == "blue", "n"])
+    b2 <- as.integer(d2[d2$c == "blue", "n"])
+    g1 <- as.integer(d1[d1$c == "green", "n"])
+    g2 <- as.integer(d2[d2$c == "green", "n"])
     
-    maxr <- max(r1, r2)
-    maxb <- max(b1, b2)
-    maxg <- max(g1, g2)
+    maxr <- max(0, max(r1, r2))
+    maxb <- max(0, max(b1, b2))
+    maxg <- max(0, max(g1, g2))
     
-    d3 <- data.frame(n1 = integer(), c1 = character())
-    if (length(maxr) & !is.na(maxr) & is.finite(maxr)) {
-      d3 <- rbind(d3, data.frame(n1 = maxr, c1 = "red"))
-    } else {
-      d3 <- rbind(d3, data.frame(n1 = 0, c1 = "red"))
-    }
-    if (length(maxb) & !is.na(maxb) & is.finite(maxb)) {
-      d3 <- rbind(d3, data.frame(n1 = maxb, c1 = "blue"))
-    } else {
-      d3 <- rbind(d3, data.frame(n1 = 0, c1 = "blue"))
-    }
-    if (length(maxg) & !is.na(maxg) & is.finite(maxg)) {
-      d3 <- rbind(d3, data.frame(n1 = maxg, c1 = "green"))
-    } else {
-      d3 <- rbind(d3, data.frame(n1 = 0, c1 = "green"))
-    }
-    
+    d3 <- data.frame(n = integer(), c = character())
+    d3 <- rbind(d3, data.frame(n = maxr, c = "red"))
+    d3 <- rbind(d3, data.frame(n = maxb, c = "blue"))
+    d3 <- rbind(d3, data.frame(n = maxg, c = "green"))    
   }
-  prod(Reduce(check_max, totals)$n1)
+  prod(Reduce(check_max, totals)$n)
 }
 
 #' @param example Which example data to use (by position or name). Defaults to
