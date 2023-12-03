@@ -116,7 +116,6 @@ f03a <- function(x) {
 f03b <- function(x) {
   sum(f03b_helper(x)$power)
 }
-#10933809 too low
 
 f03_helper <- function(x) {
   mat <- matrix(c(unlist(strsplit(x, ""))), ncol = nchar(x[[1]]), byrow = TRUE)
@@ -193,7 +192,6 @@ find_num <- function(m, pos) {
   data.frame(part = snum)
 }
 
-
 search_nearby <- function(m, pos) {
   (test_for_sym(m, pos, c(-1, -1)) ||
      test_for_sym(m, pos, c(-1, 0)) ||
@@ -213,15 +211,6 @@ test_for_sym <- function(m, pos, offset) {
     ! (m[matrix(newpos, nrow = 1)] %in% c(".", 0:9))
   }
 }
-
-# test_for_gear <- function(m, pos, offset) {
-#   newpos <- pos + offset
-#   if (newpos[1] > nrow(m) || newpos[1] <= 0 || newpos[2] > ncol(m) || newpos[2] <= 0) {
-#     FALSE
-#   } else {
-#     (m[matrix(newpos, nrow = 1)] == "*"
-#   }
-# }
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
