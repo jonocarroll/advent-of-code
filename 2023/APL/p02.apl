@@ -27,3 +27,13 @@ p←⊃⎕NGET'p02.txt'1
 ∇
 ⎕←+/solve¨p
 
+∇ res←solveb input 
+  parts←':'(≠⊆⊢)input
+  game←⍎'Game '⎕R''⊃parts
+  cubes←∊','(≠⊆⊢)¨(';'(≠⊆⊢)⊃1↓parts)
+  counts←'[0-9]+'⎕S'&'⊢∊cubes
+  cols←'red' 'green' 'blue'⎕S'&'⊢∊cubes
+  tbl←cols{(⊃⍺)(⌈/⍎¨⍵)}⌸counts
+  res←×/tbl[;2]
+∇
+⎕←+/solveb¨p
