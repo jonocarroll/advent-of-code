@@ -56,10 +56,49 @@
 #' of all of the part numbers in the engine schematic?*
 #'
 #' **Part Two**
-#'
-#' *(Use have to manually add this yourself.)*
-#'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' 
+#' The engineer finds the missing part and installs it in the engine! As
+#' the engine springs to life, you jump in the closest gondola, finally
+#' ready to ascend to the water source.
+#' 
+#' You don\'t seem to be going very fast, though. Maybe something is still
+#' wrong? Fortunately, the gondola has a phone labeled \"help\", so you
+#' pick it up and the engineer answers.
+#' 
+#' Before you can explain the situation, she suggests that you look out the
+#' window. There stands the engineer, holding a phone in one hand and
+#' waving with the other. You\'re going so slowly that you haven\'t even
+#' left the station. You exit the gondola.
+#' 
+#' The missing part wasn\'t the only issue - one of the gears in the engine
+#' is wrong. A *gear* is any `*` symbol that is adjacent to *exactly two
+#' part numbers*. Its *gear ratio* is the result of
+#' [multiplying]{title="They're magic gears."} those two numbers together.
+#' 
+#' This time, you need to find the gear ratio of every gear and add them
+#' all up so that the engineer can figure out which gear needs to be
+#' replaced.
+#' 
+#' Consider the same engine schematic again:
+#' 
+#'     467..114..
+#'     ...*......
+#'     ..35..633.
+#'     ......#...
+#'     617*......
+#'     .....+.58.
+#'     ..592.....
+#'     ......755.
+#'     ...$.*....
+#'     .664.598..
+#' 
+#' In this schematic, there are *two* gears. The first is in the top left;
+#' it has part numbers `467` and `35`, so its gear ratio is `16345`. The
+#' second gear is in the lower right; its gear ratio is `451490`. (The `*`
+#' adjacent to `617` is *not* a gear because it is only adjacent to one
+#' part number.) Adding up all of the gear ratios produces *`467835`*.
+#' 
+#' *What is the sum of all of the gear ratios in your engine schematic?*
 #'
 #' @param x some data
 #' @return For Part One, `f03a(x)` returns .... For Part Two,
@@ -71,15 +110,13 @@
 f03a <- function(x) {
   sum(as.integer(f03_helper(x)$part))
 }
-#326410 too low
-#536679
 
 #' @rdname day03
 #' @export
 f03b <- function(x) {
-
+  sum(f03b_helper(x)$power)
 }
-
+#10933809 too low
 
 f03_helper <- function(x) {
   mat <- matrix(c(unlist(strsplit(x, ""))), ncol = nchar(x[[1]]), byrow = TRUE)
@@ -93,10 +130,31 @@ f03_helper <- function(x) {
   }
   
   dplyr::group_by(parts, part) |>
-    # dplyr::summarise(not_missing = any(near_sym)) |>
     dplyr::filter(near_sym)
 }
-  
+
+f03b_helper <- function(x) {
+  mat <- matrix(c(unlist(strsplit(x, ""))), ncol = nchar(x[[1]]), byrow = TRUE)
+  matTF <- mat == "*"
+  asterisks <- which(matTF, arr.ind = TRUE)
+  offsets <- expand.grid(-1:1, -1:1)
+  potential_nums <- data.frame(asterisk = character(), part = character())
+  for (g in seq_len(nrow(asterisks))) {
+    for (o in seq_len(nrow(offsets))) {
+      newpos <- c(unlist(asterisks[g, ] + offsets[o,]))
+      if (mat[matrix(newpos, nrow = 1)] %in% as.character(0:9)) {
+        num <- find_num(mat, newpos)
+        potential_nums <- rbind(potential_nums, cbind(asterisk = paste(asterisks[g, 1], asterisks[g, 2], sep = "_"), num))
+      }
+    }
+  }
+  potential_nums |> 
+    dplyr::distinct() |> 
+    dplyr::group_by(asterisk) |> 
+    dplyr::filter(dplyr::n() == 2) |> 
+    dplyr::summarise(power = prod(as.integer(part)))
+}
+
 check_num <- function(m, pos) {
   near_sym <- search_nearby(m, pos)
   snum <- m[matrix(pos, nrow = 1)]
@@ -120,6 +178,22 @@ check_num <- function(m, pos) {
   data.frame(part = snum, near_sym = near_sym)
 }
 
+find_num <- function(m, pos) {
+  snum <- m[matrix(pos, nrow = 1)]
+  i <- 1
+  while(pos[2] - i > 0 && m[matrix(c(pos[1], pos[2] - i), nrow = 1)] %in% as.character(0:9)) {
+    snum <- paste0(m[matrix(c(pos[1], pos[2] - i), nrow = 1)], snum)
+    i <- i + 1
+  }
+  i <- 1
+  while(pos[2] + i <= ncol(m) && m[matrix(c(pos[1], pos[2] + i), nrow = 1)] %in% as.character(0:9)) {
+    snum <- paste0(snum, m[matrix(c(pos[1], pos[2] + i), nrow = 1)])
+    i <- i + 1
+  }
+  data.frame(part = snum)
+}
+
+
 search_nearby <- function(m, pos) {
   (test_for_sym(m, pos, c(-1, -1)) ||
      test_for_sym(m, pos, c(-1, 0)) ||
@@ -139,6 +213,15 @@ test_for_sym <- function(m, pos, offset) {
     ! (m[matrix(newpos, nrow = 1)] %in% c(".", 0:9))
   }
 }
+
+# test_for_gear <- function(m, pos, offset) {
+#   newpos <- pos + offset
+#   if (newpos[1] > nrow(m) || newpos[1] <= 0 || newpos[2] > ncol(m) || newpos[2] <= 0) {
+#     FALSE
+#   } else {
+#     (m[matrix(newpos, nrow = 1)] == "*"
+#   }
+# }
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
