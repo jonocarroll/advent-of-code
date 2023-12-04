@@ -10,12 +10,13 @@ p←⊃⎕NGET'p04.txt'1
   nums←⍎¨' '(≠⊆⊢)p[sep + ⍳(≢p)-sep]
   wins←winning ∩ nums
   count←≢wins
-  :If count=0
-      res←0
-  :EndIf
-  :If count>0
-      res←2*(count-1)
-  :EndIf
+  res←⌊2*(count-1)
 ∇
-⎕←+/solve¨ p
+⎕←+/solve¨p
 
+⍝ p←⊃⎕nget'p04.txt'1
+p←⊃⎕NGET'../R/inst/input04.txt'1
+c←{+/⊃∊⍨/⍎¨1↓⍵⊆⍨~⍵∊':|'}¨p
+⎕←+/⌊2*c-1 ⍝ part 1
+m←1=d∘.⍸⍨c(1+⊢,+)¨d←⍳≢c
+⎕←+/(s+m+.×⊢)⍣≡s←1⍨¨c ⍝ part 2
