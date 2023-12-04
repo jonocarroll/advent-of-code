@@ -225,3 +225,42 @@ example_data_03 <- function(example = 1) {
   )
   l[[example]]
 }
+
+## golfed
+x <- readLines("inst/example03.txt")
+x <- readLines("inst/input03.txt")
+m <- matrix(c(unlist(strsplit(x, ""))), ncol = nchar(x[[1]]), byrow = TRUE)
+nr <- nrow(m)
+nc <- ncol(m)
+d <- matrix(m %in% as.character(0:9), ncol = nc, byrow = FALSE)
+n <- as.integer(eval(str2lang(
+  paste0("c(", 
+         gsub("^,|,$", "", 
+              gsub(",+", "\\1,", 
+                   gsub("\\D", ",", 
+                        paste(x, collapse = ""))))
+         , ")")
+)))
+has_sym <- function(p1, p2) {
+  o <- expand.grid(-1:1, -1:1)
+  np <- o + rep(c(p1, p2), each = nrow(o))
+  np <- np[np[, 1] > 0 & np[, 1] <= nr, ]
+  np <- np[np[, 2] > 0 & np[, 2] <= nc, ]
+  np <- np[np[, 1] != 0 & np[, 2] != 0, ]
+  any(
+    !sapply(
+      seq_len(nrow(np)), 
+      \(y) m[matrix(unlist(np[y, ]), nrow = 1)]) %in% c(".", 0:9)
+  )
+}
+vhs <- Vectorize(has_sym)
+s <- outer(1:nr, 1:nc, "vhs")
+sum(as.integer(
+  n[grepl("2", 
+          strsplit(
+            gsub("^0+|0+$", "", 
+                 paste(c(t((s&d)+d)), collapse = ""))
+            , "0+")[[1]]
+  )]
+))
+
