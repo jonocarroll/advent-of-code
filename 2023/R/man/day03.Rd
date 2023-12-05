@@ -78,9 +78,49 @@ of all of the part numbers in the engine schematic?}
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+The engineer finds the missing part and installs it in the engine! As
+the engine springs to life, you jump in the closest gondola, finally
+ready to ascend to the water source.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+You don\'t seem to be going very fast, though. Maybe something is still
+wrong? Fortunately, the gondola has a phone labeled \"help\", so you
+pick it up and the engineer answers.
+
+Before you can explain the situation, she suggests that you look out the
+window. There stands the engineer, holding a phone in one hand and
+waving with the other. You\'re going so slowly that you haven\'t even
+left the station. You exit the gondola.
+
+The missing part wasn\'t the only issue - one of the gears in the engine
+is wrong. A \emph{gear} is any \code{*} symbol that is adjacent to \emph{exactly two
+part numbers}. Its \emph{gear ratio} is the result of
+[multiplying]{title="They're magic gears."} those two numbers together.
+
+This time, you need to find the gear ratio of every gear and add them
+all up so that the engineer can figure out which gear needs to be
+replaced.
+
+Consider the same engine schematic again:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..
+}\if{html}{\out{</div>}}
+
+In this schematic, there are \emph{two} gears. The first is in the top left;
+it has part numbers \code{467} and \code{35}, so its gear ratio is \code{16345}. The
+second gear is in the lower right; its gear ratio is \code{451490}. (The \code{*}
+adjacent to \code{617} is \emph{not} a gear because it is only adjacent to one
+part number.) Adding up all of the gear ratios produces \emph{\code{467835}}.
+
+\emph{What is the sum of all of the gear ratios in your engine schematic?}
 }
 \examples{
 f03a(example_data_03())
