@@ -201,47 +201,25 @@
 #' f05b()
 f05a <- function(x) {
   seeds <- as.numeric(trimws(strsplit(strsplit(x[1], ": ")[[1]][2], " ")[[1]]))
-  seed_soil_i <- grep("seed-to-soil", x)
-  soil_fert_i <- grep("soil-to-fertilizer", x)
-  fert_water_i <- grep("fertilizer-to-water", x)
-  water_light_i <- grep("water-to-light", x)
-  light_temp_i <- grep("light-to-temp", x)
-  temp_humid_i <- grep("temperature-to-humidity", x)
-  humid_loc_i <- grep("humidity-to-location", x)
   
-  get_map <- function(l) {
-    sapply(strsplit(l, " "), as.numeric)
-  }
+  seed_soil_i <<- grep("seed-to-soil", x)
+  soil_fert_i <<- grep("soil-to-fertilizer", x)
+  fert_water_i <<- grep("fertilizer-to-water", x)
+  water_light_i <<- grep("water-to-light", x)
+  light_temp_i <<- grep("light-to-temp", x)
+  temp_humid_i <<- grep("temperature-to-humidity", x)
+  humid_loc_i <<- grep("humidity-to-location", x)
   
-  seed_soil <- get_map(x[(seed_soil_i + 1):(soil_fert_i - 2)])
-  soil_fert <- get_map(x[(soil_fert_i + 1):(fert_water_i - 2)])
-  fert_water <- get_map(x[(fert_water_i + 1):(water_light_i - 2)])
-  water_light <- get_map(x[(water_light_i + 1):(light_temp_i - 2)])
-  light_temp <- get_map(x[(light_temp_i + 1):(temp_humid_i - 2)])
-  temp_humid <- get_map(x[(temp_humid_i + 1):(humid_loc_i - 2)])
-  humid_loc <- get_map(x[(humid_loc_i + 1):length(x)])
+  seed_soil <<- get_map(x[(seed_soil_i + 1):(soil_fert_i - 2)])
+  soil_fert <<- get_map(x[(soil_fert_i + 1):(fert_water_i - 2)])
+  fert_water <<- get_map(x[(fert_water_i + 1):(water_light_i - 2)])
+  water_light <<- get_map(x[(water_light_i + 1):(light_temp_i - 2)])
+  light_temp <<- get_map(x[(light_temp_i + 1):(temp_humid_i - 2)])
+  temp_humid <<- get_map(x[(temp_humid_i + 1):(humid_loc_i - 2)])
+  humid_loc <<- get_map(x[(humid_loc_i + 1):length(x)])
   
-  src_to_dest <- function(input, map) {
-    for (m in seq_len(ncol(map))) {
-      if (input >= map[2,m] && input <= (map[2,m] + map[3,m] - 1)) {
-        return(map[1,m] + (input - map[2,m]))
-      }
-    }
-    input
-  }
-  
-  trace <- function(s) {
-    src_to_dest(s, seed_soil) |> 
-      src_to_dest(soil_fert) |> 
-      src_to_dest(fert_water) |> 
-      src_to_dest(water_light) |> 
-      src_to_dest(light_temp) |> 
-      src_to_dest(temp_humid) |> 
-      src_to_dest(humid_loc)
-  }
-  min(sapply(seeds, trace))
+  min(sapply(seeds, trace, x))
 }
-
 
 #' @rdname day05
 #' @export
@@ -255,52 +233,30 @@ f05b <- function(x) {
     \(i) seq(from = start[i], to = start[i] + range[i], by = floor(dists[i])
     )
   )
+
+  seed_soil_i <<- grep("seed-to-soil", x)
+  soil_fert_i <<- grep("soil-to-fertilizer", x)
+  fert_water_i <<- grep("fertilizer-to-water", x)
+  water_light_i <<- grep("water-to-light", x)
+  light_temp_i <<- grep("light-to-temp", x)
+  temp_humid_i <<- grep("temperature-to-humidity", x)
+  humid_loc_i <<- grep("humidity-to-location", x)
   
-  seed_soil_i <- grep("seed-to-soil", x)
-  soil_fert_i <- grep("soil-to-fertilizer", x)
-  fert_water_i <- grep("fertilizer-to-water", x)
-  water_light_i <- grep("water-to-light", x)
-  light_temp_i <- grep("light-to-temp", x)
-  temp_humid_i <- grep("temperature-to-humidity", x)
-  humid_loc_i <- grep("humidity-to-location", x)
-  
-  get_map <- function(l) {
-    sapply(strsplit(l, " "), as.numeric)
-  }
-  
-  seed_soil <- get_map(x[(seed_soil_i + 1):(soil_fert_i - 2)])
-  soil_fert <- get_map(x[(soil_fert_i + 1):(fert_water_i - 2)])
-  fert_water <- get_map(x[(fert_water_i + 1):(water_light_i - 2)])
-  water_light <- get_map(x[(water_light_i + 1):(light_temp_i - 2)])
-  light_temp <- get_map(x[(light_temp_i + 1):(temp_humid_i - 2)])
-  temp_humid <- get_map(x[(temp_humid_i + 1):(humid_loc_i - 2)])
-  humid_loc <- get_map(x[(humid_loc_i + 1):length(x)])
-  
-  src_to_dest <- function(input, map) {
-    for (m in seq_len(ncol(map))) {
-      if (input >= map[2,m] && input <= (map[2,m] + map[3,m] - 1)) {
-        return(map[1,m] + (input - map[2,m]))
-      }
-    }
-    input
-  }
-    
-  trace <- function(s) {
-    src_to_dest(s, seed_soil) |> 
-      src_to_dest(soil_fert) |> 
-      src_to_dest(fert_water) |> 
-      src_to_dest(water_light) |> 
-      src_to_dest(light_temp) |> 
-      src_to_dest(temp_humid) |> 
-      src_to_dest(humid_loc)
-  }
+  seed_soil <<- get_map(x[(seed_soil_i + 1):(soil_fert_i - 2)])
+  soil_fert <<- get_map(x[(soil_fert_i + 1):(fert_water_i - 2)])
+  fert_water <<- get_map(x[(fert_water_i + 1):(water_light_i - 2)])
+  water_light <<- get_map(x[(water_light_i + 1):(light_temp_i - 2)])
+  light_temp <<- get_map(x[(light_temp_i + 1):(temp_humid_i - 2)])
+  temp_humid <<- get_map(x[(temp_humid_i + 1):(humid_loc_i - 2)])
+  humid_loc <<- get_map(x[(humid_loc_i + 1):length(x)])
   
   min_t <- Inf
   r <- Inf
   for (i in seq_along(sampseeds)) {
     for (j in sampseeds[[i]]) {
-      if (trace(j) < min_t) {
-        min_t <- trace(j)
+      z <- trace(j, x)
+      if (z < min_t) {
+        min_t <- z
         r <- i
         ss <- j
       }
@@ -310,13 +266,36 @@ f05b <- function(x) {
   prev <- sampseeds[[r]][loc_seed - 1]
   min_t <- Inf
   for (k in prev:ss) {
-    min_t <- min(min_t, trace(k))
+    min_t <- min(min_t, trace(k, x))
   }
 
   min_t
 
 }
 
+get_map <- function(l) {
+  sapply(strsplit(l, " "), as.numeric)
+}
+
+trace <- function(s, x) {
+
+  src_to_dest(s, seed_soil) |> 
+    src_to_dest(soil_fert) |> 
+    src_to_dest(fert_water) |> 
+    src_to_dest(water_light) |> 
+    src_to_dest(light_temp) |> 
+    src_to_dest(temp_humid) |> 
+    src_to_dest(humid_loc)
+}
+
+src_to_dest <- function(input, map) {
+  for (m in seq_len(ncol(map))) {
+    if (input >= map[2,m] && input <= (map[2,m] + map[3,m] - 1)) {
+      return(map[1,m] + (input - map[2,m]))
+    }
+  }
+  input
+}
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
