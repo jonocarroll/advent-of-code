@@ -139,7 +139,7 @@
 #' f06a(example_data_06())
 #' f06b()
 f06a <- function(x) {
-  prod(f06_helper(x))
+  prod(f06_helper(x, part = "a"))
 }
 
 
@@ -147,16 +147,18 @@ f06a <- function(x) {
 #' @export
 f06b <- function(x) {
   # future::plan(multisession)
-   f06_helper(x, split = FALSE)
+   f06_helper(x, part = "b")
 }
 
 hold_for <- function(n, t) {
   n*(t-n)
 }
 
-calc_race <- function(t, d) {
-  # sum(sapply(1:t, \(n) hold_for(n, t)) > d)
-  # res <- furrr::future_map_dbl(1:t, \(n) hold_for(n, t))
+calc_race <- function(t, d, part = "a") {
+  if (part == "a") {
+    return(sum(sapply(1:t, \(n) hold_for(n, t)) > d))
+    # res <- furrr::future_map_dbl(1:t, \(n) hold_for(n, t))
+  } 
   i <- 0
   res <- 0
   while(res < d) {
@@ -184,9 +186,13 @@ parse <- function(x, split = TRUE) {
   }
 }
 
-f06_helper <- function(x, split = TRUE) {
-  xx <- parse(x, split = split)
-  sapply(seq_len(nrow(xx)), \(z) calc_race(as.numeric(xx[z,1]), as.numeric(xx[z,2])))
+f06_helper <- function(x, part = "a") {
+  if (part == "a") {
+    xx <- parse(x)
+  } else {
+    xx <- parse(x, split = FALSE)
+  }
+  sapply(seq_len(nrow(xx)), \(z) calc_race(as.numeric(xx[z,1]), as.numeric(xx[z,2]), part = part))
 }
 
 #' @param example Which example data to use (by position or name). Defaults to
