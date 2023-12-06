@@ -1,4 +1,4 @@
-#!/usr/bin/dyalogscript
+#!/usr/bin/dyalogscript MAXWS=8G
 
 ⍝
 ⍝p←⊃⎕NGET'p06.txt'1
@@ -8,4 +8,4 @@ dist←{n←⍳⍺ ⋄ +/⍵<n×(⍺-n)}
 ⎕←×/dist/⍉↑m
 
 m2←{∊⍎¨1↓':'(≠⊆⊢)(~' '=⍵)/⍵}¨p
-⎕←×/dist/⍉↑m2 ⍝ doesn't work for full input
+⎕←×/dist/⍉↑m2
