@@ -208,3 +208,19 @@ example_data_06 <- function(example = 1) {
   )
   l[[example]]
 }
+
+calc_race_v <- function(t, r) {
+  p <- 1:t
+  d <- p*(t-p)
+  sum(d > r)
+}
+
+f06a2 <- function(x) {
+  x <- parse(x)
+  prod(sapply(seq_len(nrow(x)), \(y) calc_race_v(as.numeric(x[y,1]), as.numeric(x[y,2]))))
+}
+
+f06b2 <- function(x) {
+  x <- parse(x, split = FALSE)
+  prod(sapply(seq_len(nrow(x)), \(y) calc_race_v(as.numeric(x[y,1]), as.numeric(x[y,2]))))
+}
