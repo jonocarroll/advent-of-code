@@ -1,4 +1,4 @@
-#!/usr/bin/dyalogscript MAXWS=8G
+#!/usr/bin/dyalogscript MAXWS=2G
 
 ⍝
 ⍝p←⊃⎕NGET'p06.txt'1
