@@ -1,0 +1,13 @@
+⍝
+p← io:read "p07.txt"
+⍝p← io:read "../R/inst/input07.txt"
+p←⊃{" " regex:split ⍵}¨p
+hands←⊣/p
+bids←⍎¨⊢/p
+key⇐⊢«,»(⍪+⌿≡⌻)∘∪
+handrank⇐{10⊥2↑∨⊢/key ⍵}
+ranks←"23456789TJQKA"
+ans←+/ranks{bids×1+⍋⍋⍵,⍺⍳⊃hands}handrank¨hands
+ans
+
+
