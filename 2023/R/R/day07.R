@@ -208,8 +208,10 @@ strength_2 <- function(x) {
     if (detect_1p(subcard) > 0) w[i] <- 400000000
     if (detect_hk(subcard) > 0) w[i] <- 300000000
   }
-  max(w) + sum(20^(5:1)*score_card(into_cards(x), part = "b"))
+  max(w) + sum(score_card(x, part = "b"))
 }
+
+
 
 score_card <- function(x, part = "a") {
   if (part == "a") {
@@ -219,54 +221,54 @@ score_card <- function(x, part = "a") {
     cards <- rev(c("A", "K", "Q", "T", 9:2, "J"))
     values <- rev(c("d", "c", "b", "a", 9:1))
   }
-  as.hexmode(values[match(x, cards)])
+  as.hexmode(paste0(values[match(into_cards(x), cards)], collapse = ""))
 }
 
 detect_5oak <- function(x) {
   cards <- into_cards(x)
   if (!length(unique(cards)) == 1) return(0)
-  900000000 + sum(20^(5:1)*score_card(cards))
+  900000000 + score_card(x)
 }
 
 detect_4oak <- function(x) {
   cards <- into_cards(x)
   if (!any(table(cards) == 4)) return(0)
-  800000000 + sum(20^(5:1)*score_card(cards))
+  800000000 + score_card(x)
 }
 
 detect_fh <- function(x) {
   cards <- into_cards(x)
   tab <- table(cards)
   if (!setequal(tab, c(3, 2))) return(0)
-  700000000 + sum(20^(5:1)*score_card(cards))
+  700000000 + score_card(x)
 }
 
 detect_3oak <- function(x) {
   cards <- into_cards(x)
   tab <- table(cards)
   if (!setequal(tab, c(3, 1))) return(0)
-  600000000 + sum(20^(5:1)*score_card(cards))
+  600000000 + score_card(x)
 }
 
 detect_2p <- function(x) {
   cards <- into_cards(x)
   tab <- table(cards)
   if (!length(tab[tab==2]) == 2) return(0)
-  500000000 + sum(20^(5:1)*score_card(cards))
+  500000000 + score_card(x)
 }
 
 detect_1p <- function(x) {
   cards <- into_cards(x)
   tab <- table(cards)
   if (!(length(tab[tab==2]) == 1 && length(tab[tab==1]) == 3)) return(0)
-  400000000 + sum(20^(5:1)*score_card(cards))
+  400000000 + score_card(x)
 }
 
 detect_hk <- function(x) {
   cards <- into_cards(x)
   tab <- table(cards)
   if (!length(tab[tab==1]) == 5) return(0)
-  sum(20^(5:1)*score_card(cards))
+  score_card(x)
 }
 
 into_cards <- function(x) {
