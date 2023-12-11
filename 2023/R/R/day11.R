@@ -186,13 +186,7 @@ f11_helper <- function(x, expand = 1) {
   m <- m[, newcols]
   
   locs <- which(m == "#", arr.ind = TRUE)
-  s <- 0
-  for (l1 in seq_len(nrow(locs))) {
-    for (l2 in seq_len(nrow(locs))) {
-      s <- s + sum(abs(locs[l1, ] - locs[l2, ]))
-    }
-  }
-  s/2
+  sum(stats::dist(locs, method = "manhattan"))
 }
 
 
