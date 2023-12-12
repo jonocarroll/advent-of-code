@@ -182,48 +182,70 @@
 #' f12a(example_data_12())
 #' f12b()
 f12a <- function(x) {
-  # sum(sapply(x, f12_helper))
-  library(future)
-  library(furrr)
-  plan(multisession)
-  sum(future_map_int(x, f12_helper, .progress = TRUE))
+  search(x)
 }
 
 
 #' @rdname day12
 #' @export
 f12b <- function(x) {
-
+  search(x, part = "b")
 }
 
 
 f12_helper <- function(x) {
-  x <- strsplit(x, " ")[[1]]
-  cond <- strsplit(x[1], "")[[1]]
-  grp <- unlist(c(read.csv(text = x[2], header = FALSE)))
-  pat <- paste(strrep("#", grp), collapse = ".")
-  shown <- sum(grepl("#", cond))
-  nq <- sum(grepl("\\?", cond))
-  cond <- paste(cond, collapse = "")
-  ans <- 0
-  syms <- c(".", "#")
-  reps <- do.call(expand.grid, rep(list(syms), nq)) %>%
-    dplyr::filter(apply(., 1, \(y) sum(y == "#")) == sum(grp) - shown) 
 
-  ans <- 0
-  for (i in seq_len(nrow(reps))) {
-    p <- cond
-    for (j in seq_len(nq)) {
-      p <- sub("\\?", reps[i, j], p)
-    }
-    p <- strsplit(p, "")[[1]]
-    rlep <- rle(p)
-    rl <- rlep$lengths[rlep$values == "#"]
-    if (length(rl) == length(grp) && all(rl == grp)) ans <- ans + 1
-  }
-  ans
 }
 
+dfs <- function(ht, r, n, ri, ni, found) {
+  
+  res <- gethash(ht, c(ri, ni, found))
+  if (!is.null(res)) {
+    return(res)
+  }
+  # if past end
+  if (ri == length(r) + 1) {
+    # return whether n is past and none found (insert one), or 
+    # n is done and all are found (insert none)
+    res <- ( ni == length(n) + 1 && found == 0 ) ||
+      ( ni == length(n) && found == n[ni] )
+    return(as.integer(res))
+  }
+
+  count <- 0
+
+  if (r[ri] %in% c(".", "?")) {
+    if (found == 0) {
+      # if none found yet, move to next position; 
+      count <- count + dfs(ht, r, n, ri + 1, ni, 0)
+    } else if (n[ni] == found) {
+      # if group is full, move to next group
+      count <- count + dfs(ht, r, n, ri + 1, ni + 1, 0)
+    }
+  }
+
+  if ((r[ri] %in% c("#", "?")) && (ni <= length(n)) && (found < n[ni])) {
+    count <- count + dfs(ht, r, n, ri + 1, ni, found + 1)
+  }
+  sethash(ht, c(ri, ni, found), count)
+  return(count)  
+}
+
+search <- function(x, part = "a") {
+  ans <- 0
+  for (l in x) {
+    z <- strsplit(l, " ")[[1]]
+    if (part == "a") {
+    r <- strsplit(z[1], "")[[1]]
+    n <- unlist(c(read.csv(text = z[2], header = FALSE)))
+    } else {
+      r <- strsplit(paste(rep(z[1], 5), collapse = "?"), "")[[1]]
+      n <- unlist(c(read.csv(text = paste(rep(z[2], 5), collapse = ","), header = FALSE)))
+    }
+    ans <- ans + dfs(hashtab(), r, n, 1, 1, 0)
+  }
+  sprintf("%.15g", ans)
+}
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
