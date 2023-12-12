@@ -218,3 +218,23 @@ example_data_09 <- function(example = 1) {
   )
   l[[example]]
 }
+
+vdm <- function(x, part = "a") {
+  x <- as.integer(strsplit(x, " ")[[1]])
+  if (part == "b") x <- rev(x)
+  r <- length(x)
+  s <- as.numeric(seq_along(x) - 1)
+  round(sum(r^(s)*zapsmall(solve(outer(s, s, "^")) %*% x)))
+}
+
+f09a_apl <- function(x) {
+  sum(sapply(x, vdm))
+}
+
+f09b_apl <- function(x) {
+  sum(sapply(x, vdm, part = "b"))
+}
+
+
+# f09a_apl(ex(9))
+# f09b_apl(ex(9))
