@@ -6,8 +6,9 @@ p←⊃⎕NGET'p04.txt'1
 ∇ res←solve input
   p←'Card.*: '⎕R'' ⊢input
   sep←⍸ p='|'
-  winning←⍎¨' '(≠⊆⊢)(sep-1)↑p
-  nums←⍎¨' '(≠⊆⊢)p[sep + ⍳(≢p)-sep]
+⍝  winning←⍎¨' '(≠⊆⊢)(sep-1)↑p
+  winning←⍎(sep-1)↑p
+  nums←⍎p[sep + ⍳(≢p)-sep]
   wins←winning ∩ nums
   count←≢wins
   res←⌊2*(count-1)
