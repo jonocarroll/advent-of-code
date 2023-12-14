@@ -161,9 +161,24 @@
 #' f14a(example_data_14())
 #' f14b()
 f14a <- function(x) {
+    y <- matrix(strsplit(paste(x, collapse = ""), "")[[1]], nrow = nchar(x[1]), byrow = TRUE)
+    z <- apply(y, 2, roll)
+    sum(nrow(y) - which(z == "O", arr.ind = TRUE)[, 1] + 1)
+}
+
+f14a_2 <- function(x) {
   y <- matrix(strsplit(paste(x, collapse = ""), "")[[1]], nrow = nchar(x[1]), byrow = TRUE)
-  z <- apply(y, 2, roll)
-  sum(nrow(y) - which(z == "O", arr.ind = TRUE)[, 1] + 1)
+  z <- t(apply(y, 2, rev)) # rotate
+  zstr <- apply(z, 1, paste, collapse = "")
+  # replace O. with .O until the result doesn't change
+  newzstr <- oldzstr <- zstr
+  oldzstr[] <- ""
+  while (!all(newzstr == oldzstr)) {
+    oldzstr <- newzstr
+    newzstr <- gsub("O\\.", ".O", oldzstr)
+  }
+  zstr <- matrix(unlist(strsplit(newzstr, "")), nrow = nrow(y), byrow = TRUE)
+  sum(which(zstr == "O", arr.ind = TRUE)[, 2])
 }
 
 roll <- function(x) {
