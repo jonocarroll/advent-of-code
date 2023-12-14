@@ -1,0 +1,244 @@
+#' Day 14: Parabolic Reflector Dish
+#'
+#' [Parabolic Reflector Dish](https://adventofcode.com/2023/day/14)
+#'
+#' @name day14
+#' @rdname day14
+#' @details
+#'
+#' **Part One**
+#'
+#' You reach the place where all of the mirrors were pointing: a massive
+#' [parabolic reflector
+#' dish](https://en.wikipedia.org/wiki/Parabolic_reflector){target="_blank"}
+#' [attached]{title="Why, where do you attach YOUR massive parabolic reflector dishes?"}
+#' to the side of another large mountain.
+#' 
+#' The dish is made up of many small mirrors, but while the mirrors
+#' themselves are roughly in the shape of a parabolic reflector dish, each
+#' individual mirror seems to be pointing in slightly the wrong direction.
+#' If the dish is meant to focus light, all it\'s doing right now is
+#' sending it in a vague direction.
+#' 
+#' This system must be what provides the energy for the lava! If you focus
+#' the reflector dish, maybe you can go where it\'s pointing and use the
+#' light to fix the lava production.
+#' 
+#' Upon closer inspection, the individual mirrors each appear to be
+#' connected via an elaborate system of ropes and pulleys to a large metal
+#' platform below the dish. The platform is covered in large rocks of
+#' various shapes. Depending on their position, the weight of the rocks
+#' deforms the platform, and the shape of the platform controls which ropes
+#' move and ultimately the focus of the dish.
+#' 
+#' In short: if you move the rocks, you can focus the dish. The platform
+#' even has a control panel on the side that lets you *tilt* it in one of
+#' four directions! The rounded rocks (`O`) will roll when the platform is
+#' tilted, while the cube-shaped rocks (`#`) will stay in place. You note
+#' the positions of all of the empty spaces (`.`) and rocks (your puzzle
+#' input). For example:
+#' 
+#'     O....#....
+#'     O.OO#....#
+#'     .....##...
+#'     OO.#O....O
+#'     .O.....O#.
+#'     O.#..O.#.#
+#'     ..O..#O..O
+#'     .......O..
+#'     #....###..
+#'     #OO..#....
+#' 
+#' Start by tilting the lever so all of the rocks will slide *north* as far
+#' as they will go:
+#' 
+#'     OOOO.#.O..
+#'     OO..#....#
+#'     OO..O##..O
+#'     O..#.OO...
+#'     ........#.
+#'     ..#....#.#
+#'     ..O..#.O.O
+#'     ..O.......
+#'     #....###..
+#'     #....#....
+#' 
+#' You notice that the support beams along the north side of the platform
+#' are *damaged*; to ensure the platform doesn\'t collapse, you should
+#' calculate the *total load* on the north support beams.
+#' 
+#' The amount of load caused by a single rounded rock (`O`) is equal to the
+#' number of rows from the rock to the south edge of the platform,
+#' including the row the rock is on. (Cube-shaped rocks (`#`) don\'t
+#' contribute to load.) So, the amount of load caused by each rock in each
+#' row is as follows:
+#' 
+#'     OOOO.#.O.. 10
+#'     OO..#....#  9
+#'     OO..O##..O  8
+#'     O..#.OO...  7
+#'     ........#.  6
+#'     ..#....#.#  5
+#'     ..O..#.O.O  4
+#'     ..O.......  3
+#'     #....###..  2
+#'     #....#....  1
+#' 
+#' The total load is the sum of the load caused by all of the *rounded
+#' rocks*. In this example, the total load is *`136`*.
+#' 
+#' Tilt the platform so that the rounded rocks all roll north. Afterward,
+#' *what is the total load on the north support beams?*
+#'
+#' **Part Two**
+#' 
+#' The parabolic reflector dish deforms, but not in a way that focuses the
+#' beam. To do that, you\'ll need to move the rocks to the edges of the
+#' platform. Fortunately, a button on the side of the control panel labeled
+#' \"*spin cycle*\" attempts to do just that!
+#' 
+#' Each *cycle* tilts the platform four times so that the rounded rocks
+#' roll *north*, then *west*, then *south*, then *east*. After each tilt,
+#' the rounded rocks roll as far as they can before the platform tilts in
+#' the next direction. After one cycle, the platform will have finished
+#' rolling the rounded rocks in those four directions in that order.
+#' 
+#' Here\'s what happens in the example above after each of the first few
+#' cycles:
+#' 
+#'     After 1 cycle:
+#'     .....#....
+#'     ....#...O#
+#'     ...OO##...
+#'     .OO#......
+#'     .....OOO#.
+#'     .O#...O#.#
+#'     ....O#....
+#'     ......OOOO
+#'     #...O###..
+#'     #..OO#....
+#' 
+#'     After 2 cycles:
+#'     .....#....
+#'     ....#...O#
+#'     .....##...
+#'     ..O#......
+#'     .....OOO#.
+#'     .O#...O#.#
+#'     ....O#...O
+#'     .......OOO
+#'     #..OO###..
+#'     #.OOO#...O
+#' 
+#'     After 3 cycles:
+#'     .....#....
+#'     ....#...O#
+#'     .....##...
+#'     ..O#......
+#'     .....OOO#.
+#'     .O#...O#.#
+#'     ....O#...O
+#'     .......OOO
+#'     #...O###.O
+#'     #.OOO#...O
+#' 
+#' This process should work if you leave it running long enough, but
+#' you\'re still worried about the north support beams. To make sure
+#' they\'ll survive for a while, you need to calculate the *total load* on
+#' the north support beams after `1000000000` cycles.
+#' 
+#' In the above example, after `1000000000` cycles, the total load on the
+#' north support beams is *`64`*.
+#' 
+#' Run the spin cycle for `1000000000` cycles. Afterward, *what is the
+#' total load on the north support beams?*
+#'
+#' @param x some data
+#' @return For Part One, `f14a(x)` returns .... For Part Two,
+#'   `f14b(x)` returns ....
+#' @export
+#' @examples
+#' f14a(example_data_14())
+#' f14b()
+f14a <- function(x) {
+  y <- matrix(strsplit(paste(x, collapse = ""), "")[[1]], nrow = nchar(x[1]), byrow = TRUE)
+  z <- apply(y, 2, roll)
+  sum(nrow(y) - which(z == "O", arr.ind = TRUE)[, 1] + 1)
+}
+
+roll <- function(x) {
+  for (j in 2:length(x)) {
+    if (x[j] %in% c(".", "#")) next
+    if (x[j] == "O") {
+      x[j] <- "."
+      for (k in (j-1):1) {
+        if (x[k] == ".") next
+        k <- k + 1
+        break
+      }
+      x[k] <- "O"
+    }
+  }
+  x
+}
+
+#' @rdname day14
+#' @export
+f14b <- function(x) {
+  y <- matrix(strsplit(paste(x, collapse = ""), "")[[1]], nrow = nchar(x[1]), byrow = TRUE)
+  reslist <- vector(mode = "integer", length = 1000)
+  z <- y
+  for (i in seq_along(reslist)) {
+    z <- apply(z, 2, roll) # tilt N
+    z <- t(apply(z, 2, rev)) # rot 
+    z <- apply(z, 2, roll) # tilt W
+    z <- t(apply(z, 2, rev)) # rot 
+    z <- apply(z, 2, roll) # tilt S
+    z <- t(apply(z, 2, rev)) # rot 
+    z <- apply(z, 2, roll) # tilt E
+    z <- t(apply(z, 2, rev)) # rot 
+    reslist[i] <- sum(nrow(z) - which(z == "O", arr.ind = TRUE)[, 1] + 1)
+  }
+  cyc <- detect_cycle(reslist)
+  ncycles <- 1e9
+  offset <- ncycles - cyc$start
+  cyc$seq[(offset %% cyc$len) + 1]
+}
+
+# borrowed from my own AoC2022Day17
+detect_cycle <- function(x) {
+  # if the data is cyclic, a matrix of the data will have the same value in every column
+  for (len in 2:3000) {
+    if ((4*len - 1) > length(x)) break
+    for (start in 1:500) {
+      if ((start + 4*len - 1) > length(x)) break
+      m <- matrix(x[start:(start + 4*len - 1)], ncol = len, byrow = TRUE)
+      u <- 0
+      for (r in 1:len) {
+        if (!length(unique(m[, r])) == 1) break
+        u <- u + 1
+      }
+      # if (all(apply(, 2, \(y) length(unique(y))) == 1)) {
+      if (u == len) return(list(start = start, len = len, seq = x[start:(start + len - 1)]))
+    }
+  }
+}
+
+f14_helper <- function(x) {
+
+}
+
+
+#' @param example Which example data to use (by position or name). Defaults to
+#'   1.
+#' @rdname day14
+#' @export
+example_data_14 <- function(example = 1) {
+  l <- list(
+    a = c(
+
+
+    )
+  )
+  l[[example]]
+}
