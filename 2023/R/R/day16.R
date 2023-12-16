@@ -162,131 +162,103 @@
 #' f16b()
 f16a <- function(x) {
   x <- matrix(strsplit(paste(x, collapse = ""), "")[[1]], ncol = nchar(x[1]), byrow = TRUE)
-  queue <<- visited <<- data.frame(row = integer(), col = integer(), dir = character())
-  queue <<- rbind(queue, data.frame(row = 1, col = 1, dir = "r"))
+  queue <- utils::hashtab()
+  visited <- utils::hashtab()
+  visiteddir <- utils::hashtab()
+  sethash(queue, c(1+1i, 1i), 1)
   ans <- 0
-  while (nrow(queue) > 0) {
-    nextpos <- tail(queue, 1)
-    queue <<- head(queue, -1)
-    queue <<- dplyr::setdiff(queue, visited)
-    ans <- ans + beam(x, c(nextpos$row, nextpos$col), nextpos$dir)
+  while (numhash(queue) > 0) {
+    keys <- hashkeys(queue)
+    nextpos <- keys[[1]]
+    remhash(queue, nextpos)
+    res <- beam(queue, visited, visiteddir, x, nextpos[1], nextpos[2])
+    visited <- res$v
+    visiteddir <- res$vd
+    queue <- res$htq
+    ans <- ans + res$e
   }
   ans
 }
 
-beam <- function(m, pos, dir) {
-  dirpos <- switch(dir, 
-                "l" = c(0, -1),
-                "r" = c(0, 1),
-                "u" = c(-1, 0),
-                "d" = c(1, 0))
-  if (pos[1] < 1 | pos[1] > nrow(m) | 
-      pos[2] < 1 | pos[2] > ncol(m)) {
-    return(0)
-  }
-  if (nrow(visited[visited$row == pos[1] & visited$col == pos[2] & visited$dir == dir, ]) > 0) {
-    return(0)
-  }
-  if (nrow(visited[visited$row == pos[1] & visited$col == pos[2], ]) == 0) {
-    energized <- 1
-  } else {
-    energized <- 0
-  }
-  here <- m[pos[1], pos[2]]
-  visited <<- rbind(visited, data.frame(row = pos[1], col = pos[2], dir = dir))
-  if (here == ".") {
-    queue <<- rbind(queue, data.frame(row = pos[1] + dirpos[1], 
-                                      col = pos[2] + dirpos[2],
-                                      dir = dir))
-  } else if (here == "|" && dir %in% c("l", "r")) {
-    for (n in c("u", "d")) {
-      dirpos <- switch(n, 
-                       "u" = c(-1, 0),
-                       "d" = c(1, 0))
-      queue <<- rbind(queue, data.frame(row = pos[1] + dirpos[1],
-                                        col = pos[2] + dirpos[2], 
-                                        dir = n))
-    }
-  } else if (here == "|" && dir %in% c("u", "d")) {
-    queue <<- rbind(queue, data.frame(row = pos[1] + dirpos[1],
-                                      col = pos[2] + dirpos[2], 
-                                      dir = dir))
-    
-  } else if (here == "-" && dir %in% c("l", "r")) {
-    queue <<- rbind(queue, data.frame(row = pos[1] + dirpos[1],
-                                      col = pos[2] + dirpos[2], 
-                                      dir = dir))
-  } else if (here == "-" && dir %in% c("u", "d")) {
-    for (n in c("l", "r")) {
-      dirpos <- switch(n, 
-                       "l" = c(0, -1),
-                       "r" = c(0, 1))
-      queue <<- rbind(queue, data.frame(row = pos[1] + dirpos[1],
-                                        col = pos[2] + dirpos[2], 
-                                        dir = n))
-    }
-  } else if (here == "\\") {
-    newpos <- switch(dir, 
-                     "l" = pos + c(-1, 0),
-                     "r" = pos + c(1, 0),
-                     "u" = pos + c(0, -1),
-                     "d" = pos + c(0, 1))
-    newdir <- switch(dir, 
-                     "l" = "u",
-                     "r" = "d",
-                     "u" = "l", 
-                     "d" = "r")
-    queue <<- rbind(queue, data.frame(row = newpos[1],
-                                      col = newpos[2], 
-                                      dir = newdir))
-    
-  } else if (here == "/") {
-    newpos <- switch(dir, 
-                     "l" = pos + c(1, 0),
-                     "r" = pos + c(-1, 0),
-                     "u" = pos + c(0, 1),
-                     "d" = pos + c(0, -1))
-    newdir <- switch(dir, 
-                     "l" = "d",
-                     "r" = "u",
-                     "u" = "r", 
-                     "d" = "l")
-    queue <<- rbind(queue, data.frame(row = newpos[1],
-                                      col = newpos[2], 
-                                      dir = newdir))
-  }
-  energized
+reflect <- function(mirror, dir) {
+  switch(mirror, 
+         "|" = c(-1, 1),
+         "-" = c(-1i, 1i),
+         "\\" = Conj(dir*-1i),
+         "/" = Conj(dir*1i),
+         "." = dir
+  )
 }
 
+beam <- function(htq, v, vd, m, pos, dir) {
+  if (Re(pos) < 1 | Re(pos) > nrow(m) | 
+      Im(pos) < 1 | Im(pos) > ncol(m)) {
+    return(list(e = 0, v = v, vd = vd, htq = htq))
+  }
+  beenheredir <- gethash(vd, c(pos, dir))
+  if (!is.null(beenheredir)) {
+    return(list(e = 0, v = v, vd = vd, htq = htq))
+  }
+  energized <- as.integer(is.null(gethash(v, pos)))
+  here <- m[Re(pos), Im(pos)]
+  sethash(vd, c(pos, dir), 1)
+  sethash(v, pos, 1)
+  newdir <- reflect(here, dir)
+  for (n in newdir) {
+    if (is.null(gethash(vd, c(pos + n, n)))) {
+      sethash(htq, c(pos + n, n), 1)
+    }
+  }
   
+  list(e = energized, v = v, vd = vd, htq = htq)
+}
+
+hashkeys <- function(h) {
+  val <- vector("list", numhash(h))
+  idx <- 0
+  maphash(h, function(k, v) { idx <<- idx + 1
+  val[idx] <<- list(k) })
+  val
+}  
+
 #' @rdname day16
 #' @export
 f16b <- function(x) {
   x <- matrix(strsplit(paste(x, collapse = ""), "")[[1]], ncol = nchar(x[1]), byrow = TRUE)
-  down <- expand.grid(row = 1, col = 1:ncol(x), dir = "d", stringsAsFactors = FALSE)
-  up <- expand.grid(row = nrow(x), col = 1:ncol(x), dir = "u", stringsAsFactors = FALSE)
-  right <- expand.grid(row = 1:nrow(x), col = 1, dir = "r", stringsAsFactors = FALSE)
-  left <- expand.grid(row = 1:nrow(x), col = ncol(x), dir = "d", stringsAsFactors = FALSE)
+  down <- expand.grid(row = 1, col = 1:ncol(x), dir = 1, stringsAsFactors = FALSE) |> 
+    dplyr::transmute(pos = row + col*1i, dir = dir)
+  up <- expand.grid(row = nrow(x), col = 1:ncol(x), dir = -1, stringsAsFactors = FALSE) |> 
+    dplyr::transmute(pos = row + col*1i, dir = dir)
+  right <- expand.grid(row = 1:nrow(x), col = 1, dir = 1i, stringsAsFactors = FALSE) |> 
+    dplyr::transmute(pos = row + col*1i, dir = dir)
+  left <- expand.grid(row = 1:nrow(x), col = ncol(x), dir = -1i, stringsAsFactors = FALSE) |> 
+    dplyr::transmute(pos = row + col*1i, dir = dir)
   edges <- do.call(rbind, list(up, down, left, right))
   bestans <- 0
   library(future)
   plan(multisession)
-  all_ans <- furrr::future_map_int(seq_len(nrow(edges)), \(z) f16_helper(x, edges, z))
+  all_ans <- furrr::future_map_int(seq_len(nrow(edges)), \(z) f16_helper(x, edges, z), .progress = TRUE)
   max(all_ans)
 }
 
 
 f16_helper <- function(x, edges, e) {
-  queue <<- visited <<- data.frame(row = integer(), col = integer(), dir = character())
-  queue <<- rbind(queue, data.frame(row = edges[e, 1], col = edges[e, 2], dir = edges[e, ]$dir))
+  queue <- utils::hashtab()
+  visited <- utils::hashtab()
+  visiteddir <- utils::hashtab()
+  sethash(queue, c(edges[e, 1], edges[e, 2]), 1)
   ans <- 0
-  while (nrow(queue) > 0) {
-    nextpos <- tail(queue, 1)
-    queue <<- head(queue, -1)
-    queue <<- dplyr::setdiff(queue, visited)
-    ans <- ans + beam(x, c(nextpos$row, nextpos$col), nextpos$dir)
+  while (numhash(queue) > 0) {
+    keys <- hashkeys(queue)
+    nextpos <- keys[[1]]
+    remhash(queue, nextpos)
+    res <- beam(queue, visited, visiteddir, x, nextpos[1], nextpos[2])
+    visited <- res$v
+    visiteddir <- res$vd
+    queue <- res$htq
+    ans <- ans + res$e
   }
- ans
+  ans
 }
 
 
@@ -303,3 +275,4 @@ example_data_16 <- function(example = 1) {
   )
   l[[example]]
 }
+
