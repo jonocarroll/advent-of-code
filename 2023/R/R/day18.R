@@ -265,6 +265,27 @@ f18_helper <- function(x) {
 
 }
 
+vis_18 <- function() {
+  library(ggplot2)
+  x <- strsplit(readLines("inst/day18_output.txt"), "")
+  y <- purrr::map_df(seq_along(x), \(z) data.frame(row = z, col = seq_along(x[[z]]), char = x[[z]])) |> 
+    dplyr::mutate(char = ifelse(char == ".", " ", char)) |> 
+    dplyr::mutate(char = ifelse(char == "#", "█", char))
+  
+  # y$char <- gsub("F", "╔", y$char)
+  # y$char <- gsub("7", "╗", y$char)
+  # y$char <- gsub("J", "╝", y$char)
+  # y$char <- gsub("L", "╚", y$char)
+  # y$char <- gsub("[UD]", "║", y$char)
+  # y$char <- gsub("[LR\\*]", "═", y$char)
+  # 
+  ggplot(y, aes(col, row)) + geom_text(aes(label = char, col = char), size = 1) + 
+    theme_void() +
+    scale_y_reverse() + 
+    theme(aspect.ratio = 1, panel.background = element_rect("white"))
+  ggsave(filename = "inst/vis18.png", height = 3500, width = 3500, units = "px")
+}
+
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
