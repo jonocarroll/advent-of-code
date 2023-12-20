@@ -4,15 +4,23 @@ f17a <- function(x) {
   ngrid <- grid
   mode(ngrid) <- "integer"
   startat <- 1
-  endat <- length(grid)
+  # endat <- length(grid)
   ngrid[1] <- 0
   
   adjacency_matrix <- can_reach(ngrid)
+  endat <- prod(dim(adjacency_matrix))
   graph <- graph_from_adjacency_matrix(adjacency_matrix, mode = "directed")
   
   ans <- Inf
-  for (p in which(adjacency_matrix[startat, ] != 0)) {
-    all_path <- dijkstra(graph, start = p, end = endat)
+  starts <- 1 + (1:4-1)*nrow(ngrid)
+  ends <- 1:4*nrow(ngrid)
+  combs <- expand.grid(starts, ends)
+  for (p in seq_len(nrow(combs))) {
+  #   all_path <- shortest_paths(graph, from = combs[p,1], to = combs[p,2], mode = "out")
+  #   heat <- sum(ngrid[all_path[[1]][[1]] %% nrow(ngrid)])
+  # }
+  # for (p in which(adjacency_matrix[startat, ] != 0)) {
+    all_path <- dijkstra(ngrid, start = combs[p,1])#, end = combs[p,2])
     # valid_path <- purrr::map_lgl(all_path[[1]], ~{
     #   pos <- sapply(.x, \(w) get_pos(ngrid, w))
     #   !(any(rle(rev(pos[1,]))$lengths > 4) | any(rle(rev(pos[2,]))$lengths > 4))
@@ -116,7 +124,7 @@ get_pos <- function(grid, v) {
 #'   }
 #' }
 
-dijkstra <- function(graph, start, end){
+dijkstra <- function(graph, start, end) { 
   # Implementation of dijkstra using igraph
   # This returns an array containing the length of the shortest path from the start node to each other node.
   # It is only guaranteed to return correct results if there are no negative edges in the graph. Positive cycles are fine.
