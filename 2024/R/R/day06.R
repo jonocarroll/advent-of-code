@@ -314,7 +314,7 @@ f06b <- function() {
     while (inbounds(nr, nc, pos)) 
       if (hit_block(b, pos + dir)) {
         b[b$row == (pos+dir)[1] & b$col == (pos+dir)[2], "seen"] <- b[b$row == (pos+dir)[1] & b$col == (pos+dir)[2], "seen"] + 1
-        if (any(b$seen > 4)) return(TRUE)
+        if (any(b$seen > 3)) return(TRUE)
         dir <- turn_right(dir)
       } else {
         pos <- pos + dir
@@ -347,6 +347,7 @@ f06b <- function() {
   sum(ns)
 }
 
+# f06b()
 # system.time(f06b())
 
 f06_helper <- function(x) {
