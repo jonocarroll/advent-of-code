@@ -133,150 +133,102 @@
 #' f09a(example_data_09())
 #' f09b()
 f09a <- function(x) {
-  # x <- "12345"
-  x <- "2333133121414131402"
   x <- readLines("inst/input09.txt")
   d <- data.frame(len = as.integer(strsplit(x, "")[[1]]))
   d$what <- "f"
   d$id <- "."
   d[seq_len(nrow(d)) %% 2 == 0, "what"] <- "b"
   d[seq_len(nrow(d)) %% 2 == 1, "id"] <- seq_len(nrow(d) %/% 2 + 1) - 1
-  # rep(d)
-  
-  # d2 <- data.frame(what = character(), id = integer())
+
   whats <- c()
   ids <- c()
   for (i in seq_len(nrow(d))) {
     if (d[i, "len"] == 0) next
-    # d2 <- rbind(d2, data.frame(what = d[i, "what"], id = rep(d[i, "id"], d[i, "len"])))
     whats <- c(whats, rep(d[i, "what"], d[i, "len"]))
     ids <- c(ids, rep(d[i, "id"], d[i, "len"]))
   }
-  
-  # d <- d2
-  
+
   n_b <- length(which(whats == "b"))
-  # n_b <- nrow(d[d$what == "b", ])
-  # while (all(unique(strsplit(str_sub(rev(repr(d)))))))
-  while (!all(tail(whats, nb) == "b")) {
-  # while (!all(unique(strsplit(stringr::str_sub(rev(repr(d)), -n_b), "")[[1]]) == ".")) {
-    lastfile <- d[d$what == "f", ]
-    i <- tail(rownames(lastfile), 1)
-    el <- d[i, ]
-    a <- head(rownames(d[d$what == "b", ]), 1)
-    aa <- as.integer(a)
+  while (!all(tail(whats, n_b) == "b")) {
+    lastfile <- tail(which(whats == "f"), 1)
+    id <- ids[lastfile]
+    firstblank <- head(which(whats == "b"), 1)
+
+    whats <- whats[-lastfile]
+    ids <- ids[-lastfile]
+    whats <- append(whats, "f", after = firstblank - 1)
+    ids <- append(ids, id, after = firstblank - 1)
+    whats <- whats[-(firstblank+1)]
+    ids <- ids[-(firstblank+1)]
+    whats <- c(whats, "b")
+    ids <- c(ids, ".")
     
-    # add blanks
-    d <- dplyr::add_row(d, what = "f", id = el$id, .before = aa)
-    # remove last file block
-    r <- tail(rownames(d[d$what == "f", ]), 1)
-    d <- d[rownames(d) != r, ]
-    # remove first blank
-    r <- head(rownames(d[d$what == "b", ]), 1)
-    d <- d[rownames(d) != r, ]
-    d <- dplyr::add_row(d, what = "b", id = ".")
   }
-  
-  sum(dplyr::mutate(d[d$what == "f", ], n = dplyr::row_number()-1, tot = as.integer(id) * n)$tot)
+
+  files <- which(whats=="f")
+  print(sum((files-1)*as.integer(ids[files])), digits = 22)
   
 }
 
-repr <- function(x) {
-    # res <- c()
-  # for (i in seq_len(nrow(x))) {
-  #   # if (x[i, "id"] == "X") next
-  #   res <- c(res, strrep(x[i, "id"], x[i, "len"]))
-  # }
-  # y <- x[x$what == "f", "id"]
-  res <- paste0(x$id, collapse = "")
-  # cat(res)
-  res
-}
-
-repr2 <- function(x) {
+repr <- function(lens, ids, whats) {
   res <- c()
-  for (i in seq_len(nrow(x))) {
-    # if (x[i, "id"] == "X") next
-    res <- c(res, strrep(x[i, "id"], x[i, "len"]))
+  for (i in seq_along(ids)) {
+    res <- c(res, strrep(ids[i], lens[i]))
   }
-  # y <- x[x$what == "f", "id"]
-  res <- paste0(x$id, collapse = "")
-  # cat(res)
-  res
+  paste0(res, collapse = "")
 }
 
 #' @rdname day09
 #' @export
 f09b <- function(x) {
-  # x <- "12345"
-  x <- "2333133121414131402"
   x <- readLines("inst/input09.txt")
   d <- data.frame(len = as.integer(strsplit(x, "")[[1]]))
   d$what <- "f"
   d$id <- "."
   d[seq_len(nrow(d)) %% 2 == 0, "what"] <- "b"
   d[seq_len(nrow(d)) %% 2 == 1, "id"] <- seq_len(nrow(d) %/% 2 + 1) - 1
-  # rep(d)
   
-  # d2 <- data.frame(what = character(), id = integer())
-  # # whats <- c()
-  # # ids <- c()
-  # for (i in seq_len(nrow(d))) {
-  #   if (d[i, "len"] == 0) next
-  #   d2 <- rbind(d2, data.frame(what = d[i, "what"], id = rep(d[i, "id"], d[i, "len"])))
-  #   # whats <- c(whats, rep(d[i, "what"], d[i, "len"]))
-  #   # ids <- c(ids, rep(d[i, "id"], d[i, "len"]))
-  # }
-  # 
-  # # d <- d2
-  
-  # n_b <- length(which(whats == "b"))
-  # n_b <- nrow(d[d$what == "b", ])
-  n_b <- sum(d[d$what == "b", "len"])
-  # while (all(unique(strsplit(str_sub(rev(repr(d)))))))
-  # while (!all(tail(whats, nb) == "b"))
-  skips <- c()
-  while (!all(unique(strsplit(stringr::str_sub(rev(repr(d)), -n_b), "")[[1]]) == ".")) {
-    lastfile <- d[d$what == "f" & !(d$id %in% skips), ]
-    if (!nrow(lastfile)) break
-    i <- tail(rownames(lastfile), 1)
-    el <- d[i, ]
-    # message("moving ", el$id)
-    a <- head(rownames(d[d$what == "b" & d$len >= el$len, ]), 1)
-    if (!length(a)) {
-      # message("can't move ", el$id)
-      skips <- c(skips, el$id)
+  lens <- d$len
+  whats <- d$what
+  ids <- d$id
+
+  n_b <- sum(lens[which(whats == "b")])
+  while (TRUE) {
+    lastfile <- tail(which(whats == "f"), 1)
+    if (!length(lastfile)) break
+    id <- ids[lastfile]
+    thislen <- lens[lastfile]
+    firstblank <- head(which(whats == "b" & lens >= thislen), 1)
+    if (!length(firstblank) || firstblank > lastfile) {
+      whats[lastfile] <- "F"
       next
     }
-    aa <- as.integer(a)
     
-    # remove blanks
-    d[aa, "len"] <- d[aa, "len"] - el$len
-    d <- dplyr::add_row(d, len = el$len, what = "f", id = el$id, .before = aa)
-    skips <- c(skips, el$id)
-    # remove last file block
-    r <- tail(rownames(d[d$id == el$id, ]), 1)
-    # d <- d[rownames(d) != r, ]
-    d[rownames(d) == r, ] <- data.frame(el$len, "b", ".")
-    # remove first blank
-    # r <- head(rownames(d[d$what == "b", ]), 1)
-    # d <- d[rownames(d) != r, ]
-    # d <- dplyr::add_row(d, len = el$len, what = "b", id = ".")
+    whats[lastfile] <- "b"
+    ids[lastfile] <- "."
+    lens <- append(lens, thislen, after = firstblank - 1)
+    whats <- append(whats, "F", after = firstblank - 1)
+    ids <- append(ids, id, after = firstblank - 1)
+    if (lens[firstblank + 1] - thislen == 0) {
+      lens <- lens[-(firstblank+1)]
+      whats <- whats[-(firstblank+1)]
+      ids <- ids[-(firstblank+1)]
+    } else {
+      lens[firstblank + 1] <- lens[firstblank + 1] - thislen
+    }
   }
   
   d2 <- data.frame(what = character(), id = integer())
-  for (i in seq_len(nrow(d))) {
-    if (d[i, "len"] == 0) next
-    d2 <- rbind(d2, data.frame(what = d[i, "what"], id = rep(d[i, "id"], d[i, "len"])))
+  for (i in seq_along(ids)) {
+    if (lens[i] == 0) next
+    d2 <- rbind(d2, data.frame(what = whats[i], id = rep(ids[i], lens[i])))
   }
   
-  sum(dplyr::mutate(d2, 
+  print(sum(dplyr::mutate(d2, 
                     n = dplyr::row_number()-1, 
-                    m = ifelse(what == "f", 1, 0), 
-                    tot = m * as.integer(id) * n)$tot, na.rm = T)
-  
+                    m = ifelse(what != "b", 1, 0), 
+                    tot = m * as.integer(id) * n)$tot, na.rm = T), digits = 22)
 }
-
 
 f09_helper <- function(x) {
 
