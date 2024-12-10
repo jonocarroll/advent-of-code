@@ -133,6 +133,7 @@
 #' f09a(example_data_09())
 #' f09b()
 f09a <- function(x) {
+  x <- "2333133121414131402"
   x <- readLines("inst/input09.txt")
   d <- data.frame(len = as.integer(strsplit(x, "")[[1]]))
   d$what <- "f"
@@ -153,15 +154,10 @@ f09a <- function(x) {
     lastfile <- tail(which(whats == "f"), 1)
     id <- ids[lastfile]
     firstblank <- head(which(whats == "b"), 1)
-
-    whats <- whats[-lastfile]
-    ids <- ids[-lastfile]
-    whats <- append(whats, "f", after = firstblank - 1)
-    ids <- append(ids, id, after = firstblank - 1)
-    whats <- whats[-(firstblank+1)]
-    ids <- ids[-(firstblank+1)]
-    whats <- c(whats, "b")
-    ids <- c(ids, ".")
+    whats[lastfile] <- "b"
+    ids[lastfile] <- "."
+    whats[firstblank] <- "f"
+    ids[firstblank] <- id
     
   }
 
@@ -196,6 +192,7 @@ f09b <- function(x) {
   while (TRUE) {
     lastfile <- tail(which(whats == "f"), 1)
     if (!length(lastfile)) break
+    message(lastfile)
     id <- ids[lastfile]
     thislen <- lens[lastfile]
     firstblank <- head(which(whats == "b" & lens >= thislen), 1)
