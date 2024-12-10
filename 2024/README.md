@@ -7,9 +7,9 @@
 ### Day  5: <img src=".logos/r.png"><img src=".logos/julia.png"><img src=".logos/python.png">
 ### Day  6: <img src=".logos/r.png"><img src=".logos/julia.png">
 ### Day  7: <img src=".logos/r.png"><img src=".logos/haskell.png">
-### Day  8: 
-### Day  9: 
-### Day 10: 
+### Day  8: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
+### Day  9: <img src=".logos/r.png">
+### Day 10: <img src=".logos/r.png">
 ### Day 11: 
 ### Day 12: 
 ### Day 13: 
