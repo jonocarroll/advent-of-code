@@ -1,6 +1,6 @@
 # 2024 Advent of Code
 
-### Day  1: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px"><img src=".logos/bash.png">
+### Day  1: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px"><img src=".logos/bash.png"><img src=".logos/haskell.png">
 ### Day  2: <img src=".logos/r.png"><img src=".logos/julia.png"><img src=".logos/haskell.png">
 ### Day  3: <img src=".logos/r.png"><img src=".logos/ruby.png"><img src=".logos/uiua.png" height="96px"><img src=".logos/bash.png">
 ### Day  4: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
