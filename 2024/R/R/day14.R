@@ -200,7 +200,7 @@ f14a <- function(x) {
     }
   }
   
-  posns(dd)
+  score(dd)
   
 }
 
@@ -217,13 +217,13 @@ plotgrid <- function(robots, num = FALSE) {
   cat(paste(apply(t(grid), 1, paste, collapse = ""), collapse = "\n"))
 }
 
-posns <- function(robots) {
+score <- function(robots, fun = `*`) {
   pos <- lapply(robots, \(x) x[[1]])
   q1 <- sum(unlist(lapply(pos, \(x) x[1] %in% HC1 & x[2] %in% HR1)))
   q2 <- sum(unlist(lapply(pos, \(x) x[1] %in% HC1 & x[2] %in% HR2)))
   q3 <- sum(unlist(lapply(pos, \(x) x[1] %in% HC2 & x[2] %in% HR1)))
   q4 <- sum(unlist(lapply(pos, \(x) x[1] %in% HC2 & x[2] %in% HR2)))
-  q1 * q2 * q3 * q4
+  prod(c(q1, q2, q3, q4))
 }
 
 step <- function(r) {
@@ -253,40 +253,26 @@ f14b <- function(x) {
   
   NC <- 101
   NR <- 103
-  HC1 <- 1:floor(NC/2)-1
-  HC2 <- (((NC+1)/2)+1):NC-1
-  HR1 <- 1:floor(NR/2)-1
-  HR2 <- (((NR+1)/2)+1):NR-1
   
-  most_conn <- 0
+  # just focus on the centre of the image; assume it's filled
+  HC1 <- 25:50
+  HC2 <- 50:75
+  HR1 <- 25:50
+  HR2 <- 50:75
+
+  highest_score <- 0
   at_time <- c()
   for (ti in 1:10000) { # insert largest at_time values here
     for (di in 1:length(dd)) {
       dd[[di]] <- step(dd[[di]])
     }
-    grid <- matrix(0, nrow = NC, ncol = NR)
-    for (di in 1:length(dd)) {
-      pos <- dd[[di]][[1]] + 1
-      grid[pos[1], pos[2]] <- grid[pos[1], pos[2]] + 1 
-    }
-    grid[grid != 0] <- "#"
-    grid[grid != "#"] <- " "
-    nr <- 0
-    nc <- 0
-    nr <- max(apply(grid, 1, \(x) sum(x == "#")))
-    if (nr >= most_conn) {
-      message("time: ", ti, ", nr = ", nr)
-      most_conn <- nr
-      at_time <- c(at_time, ti)
-    }
-    nc <- max(apply(grid, 2, \(x) sum(x == "#")))
-    if (nc >= most_conn) {
-      message("time: ", ti, ", nc = ", nc)
-      most_conn <- nc
+    this_score <- score(dd)
+    if (this_score >= highest_score) {
+      message("new score: ", this_score, ", it: ", ti)
+      highest_score <- this_score
       at_time <- c(at_time, ti)
     }
   }
-  at_time
 }
 
 
