@@ -14,11 +14,11 @@ parseRule' (a:b:_) = (read a, read b)
 parseOrder = map read . splitOn ","
 
 tupleListMin :: [(Int, Int)] -> Int
-tupleListMin lst = Data.List.minimum $ map (uncurry min) lst
+tupleListMin = Data.List.minimum . map (uncurry min) 
 -- or foldl1 min $ concatMap (\(a, b) -> [a, b]) lst
 
 tupleListMax :: [(Int, Int)] -> Int
-tupleListMax lst = Data.List.maximum $ map (uncurry max) lst
+tupleListMax = Data.List.maximum . map (uncurry max) 
 -- or foldl1 max $ concatMap (\(a, b) -> [a, b]) lst
 
 makeGraph :: [(Int, Int)] -> Graph.Graph
