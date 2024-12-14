@@ -1,4 +1,5 @@
 import Data.List.Split (splitOn)
+import Data.List (minimum, maximum)
 import Data.Graph as Graph
 
 -- https://5outh.blogspot.com/2012/12/graphs-and-topological-sorting-in.html
@@ -13,11 +14,11 @@ parseRule' (a:b:_) = (read a, read b)
 parseOrder = map read . splitOn ","
 
 tupleListMin :: [(Int, Int)] -> Int
-tupleListMin lst = foldl1 min $ map (uncurry min) lst
+tupleListMin lst = Data.List.minimum $ map (uncurry min) lst
 -- or foldl1 min $ concatMap (\(a, b) -> [a, b]) lst
 
 tupleListMax :: [(Int, Int)] -> Int
-tupleListMax lst = foldl1 max $ map (uncurry max) lst
+tupleListMax lst = Data.List.maximum $ map (uncurry max) lst
 -- or foldl1 max $ concatMap (\(a, b) -> [a, b]) lst
 
 makeGraph :: [(Int, Int)] -> Graph.Graph
