@@ -12,7 +12,7 @@
 ### Day 10: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
 ### Day 11: <img src=".logos/r.png"><img src=".logos/python.png"><img src=".logos/haskell.png">
 ### Day 12: <img src=".logos/r.png">
-### Day 13: <img src=".logos/r.png">
+### Day 13: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
 ### Day 14: 
 ### Day 15: 
 ### Day 16: 
