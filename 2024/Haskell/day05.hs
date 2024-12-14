@@ -12,15 +12,13 @@ parseRule = parseRule' . splitOn "|"
 parseRule' (a:b:_) = (read a, read b)
 parseOrder = map read . splitOn ","
 
--- why, oh, why does `minimum (a, b)` not return the smaller of a and b?
--- something something Foldable
 tupleListMin :: [(Int, Int)] -> Int
-tupleListMin lst = minimum els
-    where els = map (\z -> minimum $ [fst z] ++ [snd z]) lst
+tupleListMin lst = foldl1 min $ map (uncurry min) lst
+-- or foldl1 min $ concatMap (\(a, b) -> [a, b]) lst
 
 tupleListMax :: [(Int, Int)] -> Int
-tupleListMax lst = maximum els
-    where els = map (\z -> maximum $ [fst z] ++ [snd z]) lst
+tupleListMax lst = foldl1 max $ map (uncurry max) lst
+-- or foldl1 max $ concatMap (\(a, b) -> [a, b]) lst
 
 makeGraph :: [(Int, Int)] -> Graph.Graph
 makeGraph e = Graph.buildG (tupleListMin e, tupleListMax e) e
