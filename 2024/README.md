@@ -14,10 +14,10 @@
 ### Day 12: <img src=".logos/r.png">
 ### Day 13: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
 ### Day 14: <img src=".logos/r.png">
-### Day 15: 
-### Day 16: 
-### Day 17: 
-### Day 18: 
+### Day 15: <img src=".logos/r.png">
+### Day 16: <img src=".logos/r.png">
+### Day 17: <img src=".logos/r.png"><img src=".logos/haskell.png">
+### Day 18: <img src=".logos/r.png">
 ### Day 19: 
 ### Day 20: 
 ### Day 21: 
