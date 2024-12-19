@@ -145,23 +145,16 @@ f19a <- function(x) {
   v1 <- substr(v, 1, 1)
   d <- x[3:length(x)]
   
-  solves <- sapply(d, has_patterns)
+  solves <- sapply(d, count_designs)
   sum(solves > 0)
   print(sum(solves), digits = 22)
   
 }
 
-has_patterns <- memoise::memoise(function(s) {
-    fc <- substr(s, 1, 1)
-    opts <- v[which(startsWith(v, fc))]
+count_designs <- memoise::memoise(function(s) {
+    opts <- v[which(startsWith(s, v))]
     if (nchar(s) == 0) return(1)
-    n <- 0
-    for (o in opts) {
-      if (startsWith(s, o)) {
-        n <- n + has_patterns(substring(s, nchar(o)+1))
-      } 
-    }
-    return(n)
+    sum(unlist(sapply(opts, \(z) count_designs(substring(s, nchar(z)+1)))))
 })
     
 
