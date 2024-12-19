@@ -2,7 +2,6 @@ import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import Data.Bits (Bits(xor))
 import Data.Maybe
---import Debug.Trace
 
 parse :: String -> ([Int], [Int])
 parse = parse' . splitOn [""] . lines
@@ -97,6 +96,7 @@ quine p i acc
 quine' :: Program -> Int -> Int -> Maybe Int
 quine' p i acc = safeHead $ mapMaybe (\z -> tryVal p z i acc) [0..8]
 
+safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (x:_) = Just x
 
