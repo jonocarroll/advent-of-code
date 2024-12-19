@@ -9,13 +9,13 @@ halves n = ((read l), (read r))
           s = show n
 
 blink :: Int -> Int -> Int
-blink x n = blink' x n
-    where blink' _ 0 = 1
-          blink' 0 n = blink_mem 1 (n-1)
-          blink' z n 
-            | even (length (show z)) = (blink_mem (fst $ halves z) (n-1)) + 
-                                       (blink_mem (snd $ halves z) (n-1))
-            | otherwise = blink_mem (z * 2024) (n-1)
+blink x n 
+    | n == 0 = 1
+    | x == 0 = blink_mem 1 (n-1)
+    | even (length s) = blink_mem l (n-1) + blink_mem r (n-1)
+    | otherwise = blink_mem (x * 2024) (n-1)
+    where (l, r) = halves x
+          s = show x
 
 blink_mem = memo2 blink
 
