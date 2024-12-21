@@ -32,8 +32,8 @@ findPath size bytes n = aStar g dist (dist end) (== end) (0, 0)
           corrupted = S.fromList $ take n bytes
           end = (size, size)
 
-find_blocked_path :: Int -> Bytes -> Int -> (Integer -> Bool)
-find_blocked_path gsize bytes n = \n -> (isNothing $ findPath gsize bytes (fromInteger n))
+find_blocked_path :: Int -> Bytes -> (Integer -> Bool)
+find_blocked_path gsize bytes = \n -> (isNothing $ findPath gsize bytes (fromInteger n))
 
 print_as_pair :: Byte -> String
 print_as_pair (a, b) = show a ++ "," ++ show b
@@ -46,7 +46,7 @@ main = do
     let maxBytes = 1024
     let gridSize = 70
     print $ fst $ fromJust $ findPath gridSize bytes maxBytes -- part 1
-    let searchf = find_blocked_path gridSize bytes maxBytes
+    let searchf = find_blocked_path gridSize bytes 
     let first_blocked = fromInteger $ searchFrom searchf (toInteger maxBytes)
-    print $ print_as_pair $ (bytes !! (first_blocked - 1)) -- part 2
+    putStrLn $ print_as_pair $ (bytes !! (first_blocked - 1)) -- part 2
  
