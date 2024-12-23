@@ -19,9 +19,9 @@
 ### Day 17: <img src=".logos/r.png"><img src=".logos/haskell.png">
 ### Day 18: <img src=".logos/r.png"><img src=".logos/haskell.png">
 ### Day 19: <img src=".logos/r.png"><img src=".logos/haskell.png"><img src=".logos/julia.png"><img src=".logos/python.png">
-### Day 20: 
-### Day 21: 
-### Day 22: 
-### Day 23: 
+### Day 20: <img src=".logos/r.png">
+### Day 21: <img src=".logos/r.png">
+### Day 22: <img src=".logos/r.png">
+### Day 23: <img src=".logos/r.png"><img src=".logos/python.png">
 ### Day 24: 
 ### Day 25: 
