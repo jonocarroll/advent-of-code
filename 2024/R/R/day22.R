@@ -235,7 +235,7 @@ f22a <- function(x) {
   # part 1
   sum(sapply(sims, \(z) z[[2000]]))
   
-  prices <- lapply(sims, \(z) sapply(z, lastdig))
+  prices <- lapply(sims, \(z) unlist(z) %% 10)
   changes <- lapply(prices, diff)
   
   hm <- hashtab()
@@ -244,7 +244,6 @@ f22a <- function(x) {
     for (j in seq_along(prices[[i]])) {
       if ((j+3) > length(changes[[i]])) next
       s = changes[[i]][j:(j+3)]
-      if (length(s) != 4) next
       this_p = prices[[i]][j+4]
       # only consider the first sighting of a sequence
       # in each list of prices
@@ -274,10 +273,6 @@ f22a <- function(x) {
   # part 2
   max(sapply(hv, sum))
   
-}
-
-lastdig <- function(x) {
-  x %% 10
 }
 
 gen_nums <- function(s, n = 2000) {
