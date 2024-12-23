@@ -2,8 +2,8 @@
 
 ### Day  1: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px"><img src=".logos/bash.png"><img src=".logos/haskell.png">
 ### Day  2: <img src=".logos/r.png"><img src=".logos/julia.png"><img src=".logos/haskell.png">
-### Day  3: <img src=".logos/r.png"><img src=".logos/ruby.png"><img src=".logos/uiua.png" height="96px"><img src=".logos/bash.png">
-### Day  4: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
+### Day  3: <img src=".logos/r.png"><img src=".logos/ruby.png"><img src=".logos/uiua.png" height="96px"><img src=".logos/bash.png"><img src=".logos/haskell.png">
+### Day  4: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px"><img src=".logos/haskell.png">
 ### Day  5: <img src=".logos/r.png"><img src=".logos/julia.png"><img src=".logos/python.png"><img src=".logos/haskell.png">
 ### Day  6: <img src=".logos/r.png"><img src=".logos/julia.png">
 ### Day  7: <img src=".logos/r.png"><img src=".logos/haskell.png">
