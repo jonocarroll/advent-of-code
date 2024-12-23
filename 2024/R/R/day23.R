@@ -138,16 +138,11 @@ f23a <- function(x) {
   conns <- as.data.frame(do.call(rbind, strsplit(x, "-")))
   library(igraph)
   g <- graph_from_data_frame(conns, directed = FALSE)
-  allv <- V(g)
-  ts <- allv[startsWith(names(allv), "t")]
-  # list_triangles(g, "td")
-  tri <- triangles(g)
-  verts <- lapply(split(tri, gl(length(tri)/3, 3)), \(z) names(unclass(z)))
-  tverts <- Filter(\(z) any(startsWith(z, "t")), verts)
-  length(tverts) # part 1
+
+  grps <- cliques(g)
+  length(Filter(\(z) any(startsWith(names(unclass(z)), "t")), Filter(\(z) length(z) == 3, grps)))
+  paste(sort(names(grps[which.max(lengths(grps))][[1]])), collapse = ",")
   
-  lc <- igraph::largest_cliques(g)[[1]]
-  paste(sort(names(lc)), collapse = ",") # part 2
 }
 
 
