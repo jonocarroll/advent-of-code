@@ -22,6 +22,6 @@
 ### Day 20: <img src=".logos/r.png">
 ### Day 21: <img src=".logos/r.png">
 ### Day 22: <img src=".logos/r.png">
-### Day 23: <img src=".logos/r.png"><img src=".logos/python.png">
+### Day 23: <img src=".logos/r.png"><img src=".logos/python.png"><img src=".logos/haskell.png">
 ### Day 24: 
 ### Day 25: 
