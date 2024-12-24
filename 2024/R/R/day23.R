@@ -139,9 +139,9 @@ f23a <- function(x) {
   library(igraph)
   g <- graph_from_data_frame(conns, directed = FALSE)
 
-  grps <- cliques(g)
-  length(Filter(\(z) any(startsWith(names(unclass(z)), "t")), Filter(\(z) length(z) == 3, grps)))
-  paste(sort(names(grps[which.max(lengths(grps))][[1]])), collapse = ",")
+  cliques <- cliques(g)
+  length(Filter(\(z) any(startsWith(names(unclass(z)), "t")), Filter(\(z) length(z) == 3, cliques)))
+  paste(sort(names(grps[which.max(lengths(cliques))][[1]])), collapse = ",")
   
 }
 
