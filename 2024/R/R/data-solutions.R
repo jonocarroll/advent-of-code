@@ -47,8 +47,8 @@ aoc_solutions <- list(
   day22b = 1784,
   day23a = 1330,
   day23b = "hl,io,ku,pk,ps,qq,sh,tx,ty,wq,xi,xj,yp",
-  day24a = NA,
-  day24b = NA,
+  day24a = 36035961805936,
+  day24b = "jqf,mdd,skh,wpd,wts,z11,z19,z37",
   day25a = NA,
   day25b = NA
 )
