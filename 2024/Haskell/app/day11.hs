@@ -1,3 +1,5 @@
+module Day11 where
+
 import Data.MemoTrie
 
 parse :: String -> [Int]
@@ -21,8 +23,8 @@ blink_mem = memo2 blink
 
 count_em s n = print $ sum $ map (\x -> blink_mem x n) $ parse s
 
-main :: IO ()
-main = do
-    p <- readFile "R/inst/input11.txt"
+day11 :: IO ()
+day11 = do
+    p <- readFile "../R/inst/input11.txt"
     count_em p 25
     count_em p 75

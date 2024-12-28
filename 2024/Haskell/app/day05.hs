@@ -1,3 +1,5 @@
+module Day05 where
+
 import Data.List.Split (splitOn)
 import Data.List (minimum, maximum)
 import Data.Graph as Graph
@@ -53,10 +55,10 @@ re_sort rules order
     | isSorted rules order = 0
     | otherwise = mid $ topoSortedSubGraph rules order
 
-main :: IO ()
-main = do
+day05 :: IO ()
+day05 = do
     --p <- readFile "tmp.txt"
-    p <- readFile "R/inst/input05.txt"
+    p <- readFile "../R/inst/input05.txt"
     let (rules, orders) = parse p
     print $ partOne rules orders 
     print $ partTwo rules orders 

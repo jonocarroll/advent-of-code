@@ -1,3 +1,5 @@
+module Day19 where
+
 import Data.List.Split (splitOn)
 import Data.List (isPrefixOf)
 import Data.MemoTrie
@@ -23,8 +25,8 @@ count_with_towels towels = count_designs_mem
                 prefixes = filter (`isPrefixOf` p) towels
                 next z = count_designs_mem (drop (length z) p)
 
-main :: IO ()
-main = do
+day19 :: IO ()
+day19 = do
     p <- readFile "../R/inst/input19.txt"
     let (towels, patterns) = parse p
     let solves = filter (>0) $ map (count_with_towels towels) patterns

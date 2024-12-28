@@ -1,3 +1,5 @@
+module Day01 where
+
 import Data.List
 
 parse :: String -> [[Int]]
@@ -9,9 +11,9 @@ readInt = read
 score :: [Int] -> Int -> Int
 score y x = x * (length $ filter (==x) y)
 
-main :: IO ()
-main = do
-    p <- readFile "R/inst/input01.txt"
+day01 :: IO ()
+day01 = do
+    p <- readFile "../R/inst/input01.txt"
     let valpairs = parse p
     let x = map (!! 0) valpairs
     let y = map (!! 1) valpairs

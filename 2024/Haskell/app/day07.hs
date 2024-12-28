@@ -1,3 +1,5 @@
+module Day07 where
+
 import Control.Arrow ((&&&))
 
 parse :: String -> [(Integer, [Integer])]
@@ -21,8 +23,8 @@ test_ops z (x:xs) = foldl (\acc x -> filter (<=z) $ apply_funs acc x) [x] xs
 test_ops_2 :: Integer -> [Integer] -> [Integer]
 test_ops_2 z (x:xs) = foldl (\acc x -> filter (<=z) $ apply_funs_2 acc x) [x] xs
 
-main :: IO ()
-main = do
+day07 :: IO ()
+day07 = do
     p <- readFile "../R/inst/input07.txt"
     --p <- readFile "../tmp.txt"
     let parsed = parse p

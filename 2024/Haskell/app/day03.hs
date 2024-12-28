@@ -1,3 +1,5 @@
+module Day03 where
+
 import Data.List.Split (splitOn)
 import Data.Char (isDigit)
 import Text.Regex
@@ -38,9 +40,9 @@ doMult :: (Num a, Read a) => [String] -> a
 doMult [a, b] = (read  a) * (read b)
 doMult _ = 0
 
-main :: IO ()
-main = do
+day03 :: IO ()
+day03 = do
     -- p <- readFile "tmp.txt"
-    p <- readFile "R/inst/input03.txt"
+    p <- readFile "../R/inst/input03.txt"
     print $ sum $ recurseMatches p
     print $ sum $ map getDigits $ keepMuls On [] (recurseMatches2 p)

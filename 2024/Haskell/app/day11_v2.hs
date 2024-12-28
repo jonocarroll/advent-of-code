@@ -1,3 +1,5 @@
+module Day11_2 where
+
 -- inspired by https://work.njae.me.uk/2024/12/11/advent-of-code-2024-day-11/
 
 import Data.IntMultiSet (IntMultiSet)
@@ -22,8 +24,8 @@ blink = MS.concatMap blinkOnce
 
 count_em s n = print $ MS.size $ (!! n) $ iterate blink . MS.fromList $ parse s
 
-main :: IO ()
-main = do
+day11_2 :: IO ()
+day11_2 = do
     p <- readFile "../R/inst/input11.txt"
     count_em p 25
     count_em p 75

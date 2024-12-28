@@ -1,3 +1,5 @@
+module Day23 where
+
 import Data.List.Split (splitOn)
 import qualified Data.Algorithm.MaximalCliques as MC
 import Data.List
@@ -23,20 +25,20 @@ getCliques edgelist nodes = MC.getMaximalCliques (isEdge edgelist) nodes
 triangles :: Node -> Connections -> [Node] -> [Triple]
 triangles a edgelist nodes = [(a, b, c) | b <- nodes, 
                                           c <- nodes, 
+                                          b /= a, 
+                                          c /= b,
+                                          c /= a, 
                                           isEdge edgelist a b, 
                                           isEdge edgelist a c, 
-                                          isEdge edgelist b c,
-                                          b /= c, 
-                                          b /= a, 
-                                          c /= a]
+                                          isEdge edgelist b c]
 
 sortSTriple :: S.Set Triple -> S.Set [Node]
 sortSTriple = S.map (\(a, b, c) -> sort [a, b, c])
 
-main :: IO ()
-main = do
-    p <- readFile "tmp3.txt"
-    -- p <- readFile "R/inst/input23.txt"
+day23 :: IO ()
+day23 = do
+    -- p <- readFile "tmp3.txt"
+    p <- readFile "../R/inst/input23.txt"
     let edgelist = lines p
     let nodes = nub $ concat $ parse p
     let t_nodes = filter (\z -> take 1 z == "t") nodes

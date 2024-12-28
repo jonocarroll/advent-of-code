@@ -1,3 +1,5 @@
+module Day18 where
+
 import Algorithm.Search
 import Data.List.Split (splitOn)
 import qualified Data.Set as S
@@ -11,13 +13,14 @@ parse :: String -> Bytes
 parse = map (toTuple . splitOn ",") . lines
     where
         toTuple [x, y] = (read x, read y)
+        toTuple _ = error "Invalid input"
 
 neighbors :: Int -> Byte -> [Byte]
 neighbors m (x, y) = neighbors' 
     where
         neighbors' = filter inBounds offsets
         offsets = [(x, y + 1), (x - 1, y), (x + 1, y), (x, y - 1)]
-        inBounds (x, y) = x >= 0 && x <= m && y >= 0 && y <= m
+        inBounds (xx, yy) = xx >= 0 && xx <= m && yy >= 0 && yy <= m
 
 dist :: Byte -> Byte -> Int
 dist (x1, y1) (x2, y2) = abs (y2 - y1) + abs (x2 - x1)
@@ -38,10 +41,10 @@ find_blocked_path gsize bytes = \n -> (isNothing $ findPath gsize bytes (fromInt
 print_as_pair :: Byte -> String
 print_as_pair (a, b) = show a ++ "," ++ show b
 
-main :: IO ()
-main = do
+day18 :: IO ()
+day18 = do
     --p <- readFile "tmp.txt"
-    p <- readFile "R/inst/input18.txt"
+    p <- readFile "../R/inst/input18.txt"
     let bytes = parse p
     let maxBytes = 1024
     let gridSize = 70
