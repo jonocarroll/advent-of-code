@@ -3,6 +3,7 @@ module Day19 where
 import Data.List.Split (splitOn)
 import Data.List (isPrefixOf)
 import Data.MemoTrie
+import Control.Parallel.Strategies (parMap, rpar)
 
 type Towel = String
 type Towels = [Towel]
@@ -29,7 +30,7 @@ day19 :: IO ()
 day19 = do
     p <- readFile "../R/inst/input19.txt"
     let (towels, patterns) = parse p
-    let solves = filter (>0) $ map (count_with_towels towels) patterns
+    let solves = filter (>0) $ parMap rpar (count_with_towels towels) patterns
     print $ length solves
     print $ sum solves
 
