@@ -1,8 +1,7 @@
 module Day08 where
 
 import qualified Data.HashMap.Strict as M
-import Data.List (nub)
-import Data.List (intercalate)
+import Data.List (intercalate, nub)
 
 type Point2d = (Int, Int)
 
@@ -24,7 +23,7 @@ antinodes points klist grid = foldl (\acc (x, y) -> addToGrid x y acc) grid pair
 
 allAntinodes :: [Char] -> [Int] -> M.HashMap Point2d Char -> M.HashMap Point2d Char
 allAntinodes nodes k grid = foldl (\acc x -> antinodes (getNodes x) k acc) grid nodes
-    where getNodes x = (nodeLocations x grid) -- ++ (reverse $ nodeLocations x grid)
+    where getNodes x = nodeLocations x grid
 
 prettyPrintGrid :: M.HashMap Point2d Char -> String
 prettyPrintGrid grid = intercalate "\n" rows
