@@ -7,6 +7,7 @@ parse = map (parseLine . words) . lines
 
 parseLine :: (Read a, Read b) => [[Char]] -> (a, [b])
 parseLine (x:xs) = (read (init x), map read xs)
+parseLine _ = error "Invalid input"
 
 apply_funs :: [Integer] -> Integer -> [Integer]
 apply_funs x y = concatMap (\val -> [val + y, val * y]) x
@@ -18,10 +19,12 @@ apply_funs_2 :: [Integer] -> Integer -> [Integer]
 apply_funs_2 x y = concatMap (\val -> [val + y, val * y, concat' val y]) x
 
 test_ops :: Integer -> [Integer] -> [Integer]
-test_ops z (x:xs) = foldl (\acc x -> filter (<=z) $ apply_funs acc x) [x] xs
+test_ops z (x:xs) = foldl (\acc y -> filter (<=z) $ apply_funs acc y) [x] xs
+test_ops _ _ = error "Invalid input"
 
 test_ops_2 :: Integer -> [Integer] -> [Integer]
-test_ops_2 z (x:xs) = foldl (\acc x -> filter (<=z) $ apply_funs_2 acc x) [x] xs
+test_ops_2 z (x:xs) = foldl (\acc y -> filter (<=z) $ apply_funs_2 acc y) [x] xs
+test_ops_2 _ _ = error "Invalid input"
 
 day07 :: IO ()
 day07 = do

@@ -13,6 +13,7 @@ type Patterns = [Pattern]
 parse :: String -> (Towels, Patterns)
 parse = parse' . splitOn [""] . lines
     where parse' ((towels:_):patterns:_) = (splitOn ", " towels, patterns)
+          parse' _ = ([], [])
 
 count_with_towels :: Towels -> (Pattern -> Int)
 count_with_towels towels = count_designs_mem

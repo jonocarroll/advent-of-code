@@ -19,8 +19,10 @@ blink x n
     where (l, r) = halves x
           s = show x
 
+blink_mem :: Int -> Int -> Int
 blink_mem = memo2 blink
 
+count_em :: String -> Int -> IO ()
 count_em s n = print $ sum $ map (\x -> blink_mem x n) $ parse s
 
 day11 :: IO ()

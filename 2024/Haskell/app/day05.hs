@@ -10,9 +10,16 @@ import Data.Graph as Graph
 parse :: String -> ([(Int, Int)], [[Int]])
 parse = parse' . splitOn [""] . lines
     where parse' (rules:orders:_) = (map parseRule rules, map parseOrder orders)
+          parse' _ = ([], [])
 
+parseRule :: String -> (Int, Int)
 parseRule = parseRule' . splitOn "|"
+
+parseRule' :: [String] -> (Int, Int)
 parseRule' (a:b:_) = (read a, read b)
+parseRule' _ = error "Invalid input"
+
+parseOrder :: String -> [Int]
 parseOrder = map read . splitOn ","
 
 tupleListMin :: [(Int, Int)] -> Int
