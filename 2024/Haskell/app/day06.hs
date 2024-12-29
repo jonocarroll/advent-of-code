@@ -15,7 +15,6 @@ instance Hashable Dir where
 
 type Room = M.HashMap Point2d Char
 
-
 moveOneStepInDir :: Point2d -> Dir -> Point2d
 moveOneStepInDir (i, j) d = case d of 
     North -> (i - 1, j)

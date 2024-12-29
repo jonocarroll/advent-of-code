@@ -7,6 +7,7 @@ import Day04 as D04
 import Day05 as D05
 import Day06 as D06
 import Day07 as D07
+import Day08 as D08
 import Day11 as D11
 import Day17 as D17
 import Day18 as D18
@@ -26,6 +27,7 @@ main = do
     putStrLn "⭐️ Day 05 ⭐️ :" <> D05.day05
     putStrLn "⭐️ Day 06 ⭐️ :" <> D06.day06
     putStrLn "⭐️ Day 07 ⭐️ :" <> D07.day07
+    putStrLn "⭐️ Day 08 ⭐️ :" <> D08.day08
     putStrLn "⭐️ Day 11 ⭐️ :" <> D11.day11
     putStrLn "⭐️ Day 17 ⭐️ :" <> D17.day17
     putStrLn "⭐️ Day 18 ⭐️ :" <> D18.day18
