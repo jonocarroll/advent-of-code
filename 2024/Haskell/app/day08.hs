@@ -4,8 +4,9 @@ import qualified Data.HashMap.Strict as M
 import Data.List (intercalate, nub)
 
 type Point2d = (Int, Int)
+type Roof = M.HashMap Point2d Char
 
-parse :: String -> (M.HashMap Point2d Char)
+parse :: String -> Roof
 parse input = M.fromList vs
   where vs = [ ((i, j), v)
                | (i, line) <- zip [0 ..] $ lines input,
@@ -14,18 +15,18 @@ parse input = M.fromList vs
 freqs :: M.HashMap Point2d Char -> [Char]
 freqs = nub . filter (/= '.') . (map snd) . M.toList
 
-antinodes :: [Point2d] -> [Int] -> M.HashMap Point2d Char -> M.HashMap Point2d Char
+antinodes :: [Point2d] -> [Int] -> Roof -> Roof
 antinodes points klist grid = foldl (\acc (x, y) -> addToGrid x y acc) grid pairs
     where
         pairs = [(x, y) | x <- points, y <- points, x /= y]
         addToGrid x y g = foldl (\acc k -> M.insert (newPos k x y) '#' acc) g klist
         newPos k (x1, y1) (x2, y2) = (x1 + k * (x2 - x1), y1 + k * (y2 - y1))
 
-allAntinodes :: [Char] -> [Int] -> M.HashMap Point2d Char -> M.HashMap Point2d Char
+allAntinodes :: [Char] -> [Int] -> Roof -> Roof
 allAntinodes nodes k grid = foldl (\acc x -> antinodes (getNodes x) k acc) grid nodes
     where getNodes x = nodeLocations x grid
 
-prettyPrintGrid :: M.HashMap Point2d Char -> String
+prettyPrintGrid :: Roof -> String
 prettyPrintGrid grid = intercalate "\n" rows
   where
     keys = M.keys grid
@@ -33,10 +34,10 @@ prettyPrintGrid grid = intercalate "\n" rows
     maxY = maximum $ map snd keys
     rows = [[M.lookupDefault '.' (y, x) grid | x <- [0..maxX]] | y <- [0..maxY]]
 
-nodeLocations :: Char -> M.HashMap Point2d Char -> [Point2d]
+nodeLocations :: Char -> Roof -> [Point2d]
 nodeLocations c = (map fst) . filter ((== c) . snd) . M.toList
 
-n_inbound ::  M.HashMap Point2d Char -> M.HashMap Point2d Char -> Int
+n_inbound ::  Roof -> Roof -> Int
 n_inbound grid ogrid = length $ 
                        filter (\(x, y) -> x >= 0 && y >= 0 && x <= maxX && y <= maxY) $ 
                        nodeLocations '#' grid
