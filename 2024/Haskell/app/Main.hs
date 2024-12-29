@@ -13,6 +13,10 @@ import Day18 as D18
 import Day19 as D19
 import Day23 as D23
 
+-- Run all days with 
+--   /usr/bin/time -p cabal run AdventOfCode2024 -- +RTS -N8
+-- some parMap rpar in day06.hs, day19.hs, 
+
 main :: IO ()
 main = do
     putStrLn "⭐️ Day 01 ⭐️ :" <> D01.day01
@@ -27,3 +31,8 @@ main = do
     putStrLn "⭐️ Day 18 ⭐️ :" <> D18.day18
     putStrLn "⭐️ Day 19 ⭐️ :" <> D19.day19
     putStrLn "⭐️ Day 23 ⭐️ :" <> D23.day23
+    putStrLn ""
+    putStrLn (replicate 12 '⭐')
+    putStrLn "⭐️ 🎄🎄🎄🎄🎄🎄🎄🎄🎄 ⭐️"
+    putStrLn (replicate 12 '⭐')
+    putStrLn ""
