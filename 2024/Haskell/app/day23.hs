@@ -25,7 +25,7 @@ isEdge_mem :: Connections -> Node -> Node -> Bool
 isEdge_mem edgeSet = memo2 (\n1 n2 -> isEdge edgeSet n1 n2)
 
 getCliques :: Connections -> [Node] -> [Edge]
-getCliques edgeSet nodes = MC.getMaximalCliques (isEdge_mem edgeSet) nodes
+getCliques edgeSet = MC.getMaximalCliques (isEdge_mem edgeSet)
 
 triangles :: [Node] -> Connections -> [Node] -> [Triple]
 triangles [a, b] edgeSet nodes = [(a, b, c) | c <- nodes, 

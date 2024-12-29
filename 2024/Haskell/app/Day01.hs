@@ -3,10 +3,7 @@ module Day01 where
 import Data.List
 
 parse :: String -> [[Int]]
-parse = map (map readInt . words) . lines
-
-readInt :: String -> Int
-readInt = read
+parse = map (map read . words) . lines
 
 score :: [Int] -> Int -> Int
 score y x = x * (length $ filter (==x) y)

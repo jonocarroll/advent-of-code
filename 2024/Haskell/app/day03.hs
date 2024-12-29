@@ -5,12 +5,12 @@ import Data.Char (isDigit)
 import Text.Regex
 
 getMatches :: String -> Maybe (String, String, String, [String])
-getMatches s = matchRegexAll r s
-    where r = mkRegex "mul\\([0-9]{1,3},[0-9]{1,3}\\)"
+getMatches = matchRegexAll $
+             mkRegex "mul\\([0-9]{1,3},[0-9]{1,3}\\)"
 
 getDoDontMatches :: String -> Maybe (String, String, String, [String])
-getDoDontMatches s = matchRegexAll r s
-    where r = mkRegex "mul\\([0-9]{1,3},[0-9]{1,3}\\)|don't\\(\\)|do\\(\\)"
+getDoDontMatches = matchRegexAll $ 
+                   mkRegex "mul\\([0-9]{1,3},[0-9]{1,3}\\)|don't\\(\\)|do\\(\\)"
 
 recurseMatches :: String -> [Int]
 recurseMatches x = case getMatches x of
