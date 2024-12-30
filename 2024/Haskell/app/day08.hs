@@ -13,7 +13,7 @@ parse input = M.fromList vs
                  (j, v) <- zip [0 ..] line ]
 
 freqs :: M.HashMap Point2d Char -> [Char]
-freqs = nub . filter (/= '.') . (map snd) . M.toList
+freqs = nub . M.elems . M.filter (/= '.') 
 
 antinodes :: [Point2d] -> [Int] -> Roof -> Roof
 antinodes points klist grid = foldl (\acc (x, y) -> addToGrid x y acc) grid pairs
@@ -35,7 +35,7 @@ prettyPrintGrid grid = intercalate "\n" rows
     rows = [[M.lookupDefault '.' (y, x) grid | x <- [0..maxX]] | y <- [0..maxY]]
 
 nodeLocations :: Char -> Roof -> [Point2d]
-nodeLocations c = (map fst) . filter ((== c) . snd) . M.toList
+nodeLocations c = M.keys . M.filter (== c)
 
 n_inbound ::  Roof -> Roof -> Int
 n_inbound grid ogrid = length $ 
