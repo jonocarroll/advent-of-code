@@ -4,7 +4,7 @@ import qualified Data.HashMap.Strict as M
 import qualified Data.HashSet as S
 import Data.Hashable (Hashable, hashWithSalt)
 import Data.Maybe
-import Data.List (partition, nub)
+import Data.List (find, nub)
 import Control.Parallel.Strategies (parMap, rpar)
 
 type Point2d = (Int, Int)
@@ -30,19 +30,11 @@ turn90 d = case d of
     West -> North
 
 parse :: String -> (M.HashMap Point2d Char, Point2d)
-parse input = (M.insert start '^' $ M.fromList vs, start)
-  where
-    start = fst (fromJust $ safeHead startList)
-    (startList, vs) = 
-      partition 
-      ((== '^') . snd)
-      [ ((i, j), v)
-        | (i, line) <- zip [0 ..] $ lines input,
-          (j, v) <- zip [0 ..] line ]
-
-safeHead :: [a] -> Maybe a
-safeHead [] = Nothing
-safeHead (x:_) = Just x
+parse input = (M.fromList grid, start)
+  where grid = [ ((i, j), v)
+          | (i, line) <- zip [0 ..] $ lines input,
+            (j, v) <- zip [0 ..] line ]
+        start = fst $ fromJust $ find ((=='^') . snd) grid
 
 walk :: (S.HashSet (Point2d, Dir)) -> Point2d -> Dir -> Room -> Maybe (S.HashSet (Point2d, Dir))
 walk visited pos dir room 
