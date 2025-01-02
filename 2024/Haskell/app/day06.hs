@@ -68,6 +68,6 @@ day06 :: IO ()
 day06 = do
     p <- readFile "../R/inst/input06.txt"
     let (room, start) = parse p
-    let path = nub $ map fst $ S.toList $ fromJust $ walk S.empty start North room
+    let path = maybe [] (nub . map fst . S.toList) (walk S.empty start North room)
     print $ length path
     print $ addObstacles path start room
