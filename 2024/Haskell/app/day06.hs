@@ -47,10 +47,23 @@ walk visited pos dir room
         pos' = moveOneStepInDir pos dir
         visited' = S.insert (pos, dir) visited
 
+walk2 :: (S.HashSet (Point2d, Dir)) -> Point2d -> Dir -> Room -> Maybe (S.HashSet (Point2d, Dir))
+walk2 visited pos dir room = 
+    let pos' = moveOneStepInDir pos dir
+        nextpos = M.lookup pos' room
+    in if nextpos == Just '#' && S.member (pos, dir) visited 
+       then Nothing 
+       else case nextpos of 
+            Just '#' -> walk2 visited' pos (turn90 dir) room 
+            Just _ -> walk2 visited pos' dir room 
+            Nothing -> Just visited
+    where 
+        visited' = S.insert (pos, dir) visited
+
 addObstacles :: [Point2d] -> Point2d -> Room -> Int
 addObstacles path pos room = length $ filter isNothing placeObs 
     where 
-        placeObs = parMap rpar (\z -> walk S.empty pos North (room' z)) path
+        placeObs = parMap rpar (\z -> walk2 S.empty pos North (room' z)) path
         room' z = M.insert z '#' room
 
 day06 :: IO () 
