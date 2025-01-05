@@ -9,7 +9,7 @@
 ### Day  7: <img src=".logos/r.png"><img src=".logos/haskell.png">
 ### Day  8: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px"><img src=".logos/haskell.png">
 ### Day  9: <img src=".logos/r.png"><img src=".logos/rust.png"><img src=".logos/haskell.png">
-### Day 10: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
+### Day 10: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px"><img src=".logos/haskell.png"><img src=".logos/julia.png">
 ### Day 11: <img src=".logos/r.png"><img src=".logos/python.png"><img src=".logos/haskell.png">
 ### Day 12: <img src=".logos/r.png">
 ### Day 13: <img src=".logos/r.png"><img src=".logos/apl.png" height="96px">
