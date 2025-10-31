@@ -32,6 +32,7 @@ MERGE (a)-[:POSSIBLE_MOVE]->(b);
 MATCH SHORTEST 1 (trail_head:Tile {val:0})-[:POSSIBLE_MOVE]->*(top {val: 9})
 WITH trail_head, count(DISTINCT top) AS score
 WITH sum(score) AS part1
+
 // Part 2
 MATCH (trail_head:Tile {val:0})-[:POSSIBLE_MOVE]->*(top {val: 9})
 WITH part1, trail_head, count(top) AS score
