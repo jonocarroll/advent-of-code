@@ -152,41 +152,27 @@
 #' f01a(example_data_01())
 #' f01b()
 f01a <- function(x) {
-  # d <- readLines("input.txt")
-  d <- readLines("inst/input01.txt")
-  dir <- ifelse(startsWith(d, "L"), -1, 1)
-  dist <- as.integer(sub("[LR]", "", d))
-  val <- 50
-  password <- 0
-  for (i in seq_along(dist)) {
-    val <- (val + dir[i]*dist[i]) %% 100
-    password <- password + (val == 0)
-  }
-  password
+  # x <- readLines("input.txt")
+  # x <- readLines("inst/input01.txt")
+  sum(f01_helper(x) %% 100 == 0)
 }
 
 
 #' @rdname day01
 #' @export
 f01b <- function(x) {
-  # d <- readLines("input.txt")
-  d <- readLines("inst/input01.txt")
-  dir <- ifelse(startsWith(d, "L"), -1, 1)
-  dist <- as.integer(sub("[LR]", "", d))
-  val <- 50
-  password <- 0
-  for (i in seq_along(dist)) {
-    newval <- val+dir[i]*dist[i]
-    clicks <- (val+dir[i]):(newval) %% 100
-    password <- password + sum(clicks == 0)
-    val <- newval
+  # x <- readLines("input.txt")
+  # x <- readLines("inst/input01.txt")
+  hit_zero <- function(x, y) {
+    z <- x:y
+    sum(z[z!=x] %% 100 == 0)
   }
-  password
+  steps <- f01_helper(x)
+  sum(mapply(hit_zero, tail(steps, -1), head(steps, -1)))
 }
 
-
 f01_helper <- function(x) {
-
+  Reduce(`+`, as.integer(sub("L", "-", sub("R", "", x))), init = 50, accumulate = TRUE)
 }
 
 
