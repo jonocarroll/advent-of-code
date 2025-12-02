@@ -2,5 +2,8 @@
 
 export(aoc_solutions)
 export(example_data_01)
+export(example_data_02)
 export(f01a)
 export(f01b)
+export(f02a)
+export(f02b)
